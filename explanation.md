@@ -8,13 +8,9 @@ Multiple speakers participated in the dialogues. Each utterance in a dialogue ha
 
 ### Representing Video as Tensors for Machine Learning Models
 
-# Representing Video as Tensors for Machine Learning Models
-
-## Introduction
-
 In modern AI and machine learning applications, videos are represented as **tensors** to enable processing by deep learning models. This document provides a thorough understanding of how videos are structured as tensors, the mathematical principles involved, and practical implementation using Python.
 
-## 1. Understanding Video as a Data Structure
+#### Understanding Video as a Data Structure
 
 A video is a sequence of images (frames) played over time. It can be thought of as a 3D signal evolving across time:
 
@@ -34,7 +30,7 @@ where:
 - $(H)$ = Frame height (pixels)
 - $(W)$ = Frame width (pixels)
 
-## 2. Mathematical Representation
+#### Mathematical Representation
 
 Each pixel in an image has intensity values across channels, making a single frame a **3D tensor** $(C*H*W)$ Stacking these over **time** ($(T)$), we get the **4D tensor**:
 $[
@@ -46,7 +42,7 @@ where:
 - $(c)$ indexes the channel (Red, Green, Blue for RGB).
 - $(h, w)$ specify the spatial coordinates.
 
-### Alternative Representations
+#### Alternative Representations
 
 1. **Batch Representation** (Batch of Videos):
    $V \in R^{B*T*C*H*W}$
@@ -57,9 +53,9 @@ where:
    $V \in R^{T*(C*H*W)}$
    where each frame is converted into a flattened feature vector.
 
-### 3. Practical Implementation
+#### Practical Implementation
 
-### Loading a Video as a Tensor
+> Loading a Video as a Tensor
 
 We use `torchvision` and `opencv` to read video frames and convert them into a PyTorch tensor.
 
@@ -86,7 +82,7 @@ video_tensor = torch.tensor(frames, dtype=torch.float32)  # Shape: (T, H, W, C)
 video_tensor = video_tensor.permute(0, 3, 1, 2)  # Shape: (T, C, H, W)
 ```
 
-### Normalizing the Video Tensor
+> Normalizing the Video Tensor
 
 Normalization is crucial for stable training in deep learning models:
 
@@ -219,3 +215,5 @@ sentence_pair = ["How are you?", "I am fine."]
 encoding = tokenizer(sentence_pair, padding=True, truncation=True, return_tensors='pt')
 print(encoding)
 ```
+
+### Representing Audio In Tensors
