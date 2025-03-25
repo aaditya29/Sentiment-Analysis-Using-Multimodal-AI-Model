@@ -217,3 +217,7 @@ print(encoding)
 ```
 
 ### Representing Audio In Tensors
+
+Audio data plays a crucial role in various AI/ML applications, including **speech recognition, music generation, and environmental sound classification**. However, raw audio signals must be transformed into a numerical representation before being processed by machine learning models. This document provides an in-depth explanation of how audio is represented in tensors, covering **intuitive explanations, mathematical foundations, and practical implementations**.
+
+---
