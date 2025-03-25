@@ -221,3 +221,106 @@ print(encoding)
 Audio data plays a crucial role in various AI/ML applications, including **speech recognition, music generation, and environmental sound classification**. However, raw audio signals must be transformed into a numerical representation before being processed by machine learning models. This document provides an in-depth explanation of how audio is represented in tensors, covering **intuitive explanations, mathematical foundations, and practical implementations**.
 
 ---
+
+#### Understanding Audio Data
+
+Audio is a continuous signal that represents variations in **air pressure over time**. It is captured digitally through **sampling and quantization**.
+
+> Sampling and Quantization
+
+- **Sampling**: Converts a continuous waveform into discrete time steps.
+  - Defined by the **sampling rate (𝑓_s)** in Hertz (Hz), e.g., **44.1 kHz** (CD quality audio) means 44,100 samples per second.
+- **Quantization**: Converts each sample into a finite set of values, typically stored as **16-bit integers** (or floating point in deep learning models).
+
+Mathematically, a sampled audio signal is represented as:
+$[
+x[n] = A \cdot \sin(2\pi f n / f_s)
+]$
+where:
+
+- $( x[n])$ is the sampled signal at time index $( n ).$
+- $( A )$ is the amplitude
+- $( f )$ is the frequency in Hz
+- $( f_s )$ is the sampling rate
+
+Example: A **440 Hz** sine wave (A4 musical note) sampled at **16 kHz** results in **16,000 samples per second**.
+
+---
+
+#### Representing Audio as Tensors
+
+Since ML models work with numerical arrays (tensors), we must convert raw audio into a suitable tensor representation. Common formats include:
+
+> Raw Waveform Representation
+
+Audio can be represented as a **1D tensor**:
+
+```python
+import torchaudio
+import torch
+
+# Load an example audio file
+audio_waveform, sample_rate = torchaudio.load("example.wav")
+print(audio_waveform.shape)  # Shape: (Channels, Samples)
+```
+
+For **stereo audio**, the shape is `(2, N)` (2 channels, N samples). For **mono audio**, the shape is `(1, N)`.
+
+> Spectrogram Representation
+
+A more structured way to represent audio is through the **spectrogram**, which shows frequency content over time using the Short-Time Fourier Transform (STFT).
+
+Mathematically, STFT is computed as:
+$[
+STFT(x[n]) = \sum\_{m=-\infty}^{\infty} x[m] w[n - m] e^{-j2\pi f m / f_s}
+]$
+where:
+
+- $( x[m] )$ is the time-domain signal.
+- $( w[n] )$ is a windowing function (e.g., Hamming window)
+- $( e^{-j2\pi f m / f_s} )$ represents the Fourier transform
+
+#### Code Example
+
+```python
+import torchaudio.transforms as T
+
+# Convert waveform to spectrogram
+spectrogram = T.Spectrogram(n_fft=1024, win_length=512, hop_length=256)(audio_waveform)
+print(spectrogram.shape)  # Shape: (Channels, Frequency_bins, Time_frames)
+```
+
+This converts audio into a **2D tensor** (frequency vs. time).
+
+> Mel-Spectrogram Representation
+
+A **Mel-Spectrogram** applies the **Mel scale**, which better matches human perception.
+
+```python
+mel_spectrogram = T.MelSpectrogram(sample_rate=sample_rate, n_fft=1024, hop_length=256, n_mels=80)(audio_waveform)
+print(mel_spectrogram.shape)  # Shape: (Channels, Mel_bins, Time_frames)
+```
+
+> MFCC (Mel-Frequency Cepstral Coefficients)
+
+MFCCs are features used in **speech processing**, derived from the Mel-spectrogram.
+
+```python
+mfcc = T.MFCC(sample_rate=sample_rate, n_mfcc=13)(audio_waveform)
+print(mfcc.shape)  # Shape: (Channels, MFCC_coefficients, Time_frames)
+```
+
+This produces a **2D tensor**, reducing dimensionality while keeping important frequency characteristics.
+
+---
+
+#### Choosing the Right Representation
+
+| Representation  | Description                             | Tensor Shape                     |
+| --------------- | --------------------------------------- | -------------------------------- |
+| Raw Waveform    | Simple but high-dimensional             | `(1, N)`                         |
+| Spectrogram     | Captures frequency content over time    | `(Channels, Freq_bins, Time)`    |
+| Mel-Spectrogram | Human-perceptual frequency scale        | `(Channels, Mel_bins, Time)`     |
+| MFCC            | Compact representation for speech tasks | `(Channels, Coefficients, Time)` |
+
+---
