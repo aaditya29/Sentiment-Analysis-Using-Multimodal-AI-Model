@@ -333,3 +333,30 @@ This produces a **2D tensor**, reducing dimensionality while keeping important f
 | **Transfer Learning**     | ✅ Better initial performance <br> ✅ Less data needed <br> ✅ Architecture already proven | ❌ Larger model size <br> ❌ May not fit the task                                 |
 
 ---
+
+### Working with Different Modalities
+
+#### Working with Text
+
+### Without a Pre-Trained Model:
+
+❌ No difference between a "bank with money" and "a riverbank".  
+ Both are encoded the same way without context.
+
+#### With a Pre-Trained Model:
+
+✅ The output reflects the specific meaning of "bank".  
+ More context is preserved.
+
+---
+
+### Working with Video
+
+#### Without a Pre-Trained Model:
+
+❌ Simple brightness changes over time (e.g., brightness goes up, then down).
+
+#### With a Pre-Trained Model:
+
+✅ Recognizes complex patterns like a person nodding their head while smiling.  
+✅ Identifies hand waves from motion, smiles from facial features, and nods from sequences.
