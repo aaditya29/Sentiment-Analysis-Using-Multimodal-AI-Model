@@ -324,3 +324,12 @@ This produces a **2D tensor**, reducing dimensionality while keeping important f
 | MFCC            | Compact representation for speech tasks | `(Channels, Coefficients, Time)` |
 
 ---
+
+### Training from Scratch vs. Transfer Learning
+
+| Approach                  | Pros                                                                                       | Cons                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| **Training from Scratch** | ✅ Full control: optimization for a specific task <br> ✅ Smaller model                    | ❌ Requires more data <br> ❌ Needs more training time <br> ❌ Might underperform |
+| **Transfer Learning**     | ✅ Better initial performance <br> ✅ Less data needed <br> ✅ Architecture already proven | ❌ Larger model size <br> ❌ May not fit the task                                 |
+
+---
