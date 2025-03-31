@@ -360,3 +360,5 @@ This produces a **2D tensor**, reducing dimensionality while keeping important f
 
 ✅ Recognizes complex patterns like a person nodding their head while smiling.  
 ✅ Identifies hand waves from motion, smiles from facial features, and nods from sequences.
+
+## Architecture of the Model
