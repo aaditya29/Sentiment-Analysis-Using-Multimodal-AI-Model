@@ -362,3 +362,9 @@ This produces a **2D tensor**, reducing dimensionality while keeping important f
 ✅ Identifies hand waves from motion, smiles from facial features, and nods from sequences.
 
 ## Architecture of the Model
+
+Here we are going to use three types of architecture:
+
+1. Video encoder Resnet3D 18 layer.
+2. Text encoder BERT.
+3. Audio encoder raw spectrogram.
