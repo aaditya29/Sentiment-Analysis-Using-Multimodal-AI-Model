@@ -368,3 +368,5 @@ Here we are going to use three types of architecture:
 1. Video encoder Resnet3D 18 layer.
 2. Text encoder BERT.
 3. Audio encoder raw spectrogram.
+
+## Different Ways of Fusing Our Data Together
