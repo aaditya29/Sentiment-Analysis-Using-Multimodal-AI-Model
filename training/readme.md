@@ -1,6 +1,6 @@
 # Training Our Data
 
-We are going to train our data in the:
+We are going to train our data in the form of:
 
 - csv data
 - video
