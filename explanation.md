@@ -587,3 +587,34 @@ print("Model Output:", output)
 1. **Attention Mechanisms**: Use attention layers to weigh the importance of each modality dynamically.
 2. **Cross-Modal Transformers**: Employ transformers to model interactions between modalities explicitly.
 3. **Graph Neural Networks (GNNs)**: Represent modalities as nodes in a graph and learn their relationships.
+
+> For our model we will use Late Fusion Technique due to its simple implementation and robustness.
+
+## Multimodal Archtecture Details
+
+The model processes inputs from three different modalities:
+
+- **Video Encoder**: ResNet3D 18-layer model to extract video features.
+- **Text Encoder**: BERT model to extract textual features.
+- **Audio Encoder**: Raw spectrogram processing to extract audio features.
+
+#### Data Processing
+
+Each encoder outputs a feature representation of size `[batch_size, 128]`, which are concatenated to form a unified representation of size `[batch_size, 384]`.
+
+### Fusion Layer
+
+A fusion layer learns relationships between the modalities, helping the model make predictions based on combined input features.
+
+## Task-Specific Classification Heads
+
+The model makes separate predictions for two tasks:
+
+- **Emotion Classification**
+
+  - Output shape: `[batch_size, 7]`
+  - Predicts one of 7 emotions (e.g., joy, sadness, etc.)
+
+- **Sentiment Classification**
+  - Output shape: `[batch_size, 3]`
+  - Predicts sentiment as negative, neutral, or positive.
