@@ -618,3 +618,12 @@ The model makes separate predictions for two tasks:
 - **Sentiment Classification**
   - Output shape: `[batch_size, 3]`
   - Predicts sentiment as negative, neutral, or positive.
+
+## Steps Followed For Modelling
+
+- Dataset Classification
+- Encoders
+- Fusion
+- Training
+- Evaluation
+- Deployment
