@@ -370,3 +370,68 @@ Here we are going to use three types of architecture:
 3. Audio encoder raw spectrogram.
 
 ## Different Ways of Fusing Our Data Together
+
+### Late Fusion Technique
+
+Late fusion, also known as decision-level fusion, is a technique in machine learning where predictions from multiple modalities (e.g., video, text, audio) are combined at the final stage of the model pipeline. Instead of merging raw data or intermediate features, late fusion aggregates the outputs (e.g., probabilities, logits) of individual models trained on each modality.
+
+#### How It Works
+
+1. **Separate Models for Each Modality**: Each modality (e.g., video, text, audio) is processed independently using specialized models.
+2. **Generate Predictions**: Each model outputs predictions, such as class probabilities or logits.
+3. **Combine Predictions**: The predictions are combined using techniques like:
+
+- Weighted averaging
+- Majority voting
+- Concatenation followed by a meta-classifier
+
+#### Example Workflow
+
+1. **Video Encoder**: Processes video frames and outputs probabilities for each class.
+2. **Text Encoder**: Processes text data and outputs probabilities for each class.
+3. **Audio Encoder**: Processes audio signals and outputs probabilities for each class.
+4. **Fusion Layer**: Combines the outputs from all encoders to make the final prediction.
+
+#### Pros of Late Fusion
+
+- **Modality Independence**: Each modality is processed independently, allowing flexibility in model design.
+- **Scalability**: New modalities can be added without retraining the entire system.
+- **Interpretability**: Individual modality contributions can be analyzed by examining their predictions.
+- **Robustness**: If one modality fails (e.g., missing data), others can still contribute to the final decision.
+
+#### Cons of Late Fusion
+
+- **Loss of Cross-Modality Interactions**: Late fusion does not capture interactions between modalities, which may limit performance in tasks requiring joint understanding.
+- **Increased Complexity**: Requires separate models for each modality, increasing computational and memory requirements.
+- **Suboptimal for Strong Correlations**: When modalities are highly correlated, early or intermediate fusion may perform better.
+
+#### Applications of Late Fusion
+
+- **Multimodal Sentiment Analysis**: Combining video, text, and audio predictions to determine sentiment.
+- **Medical Diagnosis**: Aggregating outputs from imaging, clinical notes, and lab results.
+- **Multimodal Action Recognition**: Combining predictions from video and audio for action classification.
+
+#### Comparison with Other Fusion Techniques
+
+| Fusion Technique        | Description                                                                    | Pros                                      | Cons                                              |
+| ----------------------- | ------------------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------- |
+| **Early Fusion**        | Combines raw data or features from all modalities before feeding into a model. | Captures cross-modality interactions      | Requires aligned data; computationally expensive. |
+| **Intermediate Fusion** | Combines intermediate features from modality-specific models.                  | Balances interaction and independence     | Requires careful feature alignment.               |
+| **Late Fusion**         | Combines predictions from modality-specific models.                            | Modality independence; robust to failures | Loses cross-modality interactions.                |
+
+#### Practical Implementation
+
+```python
+import numpy as np
+
+# Example predictions from three modalities
+video_preds = np.array([0.2, 0.5, 0.3])  # Video model probabilities
+text_preds = np.array([0.1, 0.7, 0.2])   # Text model probabilities
+audio_preds = np.array([0.3, 0.4, 0.3])  # Audio model probabilities
+
+# Weighted averaging for late fusion
+weights = [0.4, 0.4, 0.2]  # Weights for video, text, and audio
+final_preds = weights[0] * video_preds + weights[1] * text_preds + weights[2] * audio_preds
+
+print("Final Predictions:", final_preds)
+```
