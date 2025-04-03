@@ -86,6 +86,14 @@ class MELDDataset(Dataset):
         """
         return torch.FloatTensor(np.array(frames)).permute(0, 3, 1, 2)
 
+    def _extract_audio_features(self, video_path):
+        # replacing the video extension with audio extension
+        audio_path = video_path.replace('.mp4', '.wav')
+
+        try:
+            print("")
+        except Exception as e:
+
     def __len__(self):
         return len(self.data)  # return the length of the dataset
 
@@ -115,7 +123,7 @@ class MELDDataset(Dataset):
 
         video_frames = self._load_video_frames(path)  # load the video frames
 
-        print(video_frames)
+        # print(video_frames)
 
 
 if __name__ == "__main__":
