@@ -4,6 +4,7 @@ from transformers import AutoTokenizer
 import os
 import numpy as np
 import torch
+import subprocess
 import cv2
 
 
@@ -90,9 +91,34 @@ class MELDDataset(Dataset):
         # replacing the video extension with audio extension
         audio_path = video_path.replace('.mp4', '.wav')
 
+        """
+        Here `subprocess.run([...])` executes the specified command in a new process. The command is passed as a list of strings, where each element corresponds to a part of the command.
+        'ffmpeg' is the command-line tool being invoked. ffmpeg is a popular multimedia framework for processing video and audio files.
+        '-i', video_path:-i specifies the input file, and video_path is the path to the video file from which audio will be extracted.
+        'vn' flag tells ffmpeg to ignore the video stream and only process the audio stream.
+        '-acodec', 'pcm_s16le' specifies the audio codec to use. pcm_s16le is a raw, uncompressed audio format with 16-bit samples and little-endian byte order.
+        '-ar', '16000': this sets the audio sample rate to 16,000 Hz (16 kHz) which is commonly used for speech processing tasks.
+        '-ac', '1': sets the number of audio channels to 1 (mono audio).
+        audio_path: specifies the output file path where the extracted audio will be saved.
+        
+        Further
+        
+        check=True ensures that an exception (subprocess.CalledProcessError) is raised if the ffmpeg command fails (i.e., returns a non-zero exit code).
+        stdout=subprocess.DEVNULL redirects the standard output (stdout) of the ffmpeg command to DEVNULL, effectively silencing any output from the command.
+        stderr=subprocess.DEVNULL redirects the standard error (stderr) of the ffmpeg command to DEVNULL, silencing any error messages.
+        """
         try:
-            print("")
+            subprocess.run([
+                'ffmpeg',
+                '-i', video_path,
+                '-vn',  # no video
+                '-acodec', 'pcm_s16le',  # audio codec
+                '-ar', '16000',  # audio sample rate
+                '-ac', '1',  # number of audio channels
+                audio_path
+            ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
+            raise ValueError(f"Audio error: {str(e)}")
 
     def __len__(self):
         return len(self.data)  # return the length of the dataset
@@ -121,9 +147,9 @@ class MELDDataset(Dataset):
                                      padding='max_length', truncation=True, max_length=128,
                                      return_tensors='pt')
 
-        video_frames = self._load_video_frames(path)  # load the video frames
-
+        # video_frames = self._load_video_frames(path)  # load the video frames
         # print(video_frames)
+        self._extract_audio_features(path)
 
 
 if __name__ == "__main__":
