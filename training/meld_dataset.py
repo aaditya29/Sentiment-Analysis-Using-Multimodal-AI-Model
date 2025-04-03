@@ -38,7 +38,7 @@ class MELDDataset(Dataset):
         def _load_video_frames(self, video_path):
             # load the video frames using OpenCV
             cap = cv2.VideoCapture(video_path)
-            frames = []
+            frames = []  # array to store the frames
 
             try:
                 if not cap.isOpened():  # check if the video is opened
@@ -52,7 +52,8 @@ class MELDDataset(Dataset):
                 # Resetting index to not skip first frame
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # resetting the index to 0
 
-                while (len) < 30 and cap.isOpened():  # reading the frame of first second only
+                # reading the frame of first second only
+                while len(frames) < 30 and cap.isOpened():
                     ret, frame = cap.read()
                     if not ret:
                         break
@@ -77,7 +78,12 @@ class MELDDataset(Dataset):
             else:
                 frames = frames[:30]  # truncating to 30 frames
 
-            # converting to tensor and changing the order of dimensions and returning the tensor
+            """
+            converting to tensor and changing the order of dimensions and returning the tensor
+            here permute rearranges the original tensor according to the desired ordering and returns a new multidimensional rotated tensor.
+            Before Permute: [frames, height, width, channels]
+            After Permute: [frames, channels, height, width]
+            """
             return torch.FloatTensor(np.array(frames)).permute(0, 3, 1, 2)
 
     def __len__(self):
@@ -90,9 +96,9 @@ class MELDDataset(Dataset):
 
         # get the path of the video
         path = os.path.join(self.video_dir, video_filename)
-        video_path = os.path.exists(path)  # check if the video exists
+        video_path_exists = os.path.exists(path)  # check if the video exists
 
-        if video_path == False:
+        if video_path_exists == False:
             raise FileNotFoundError(f"Video file at {path} not found")
 
         """
@@ -107,9 +113,8 @@ class MELDDataset(Dataset):
                                      padding='max_length', truncation=True, max_length=128,
                                      return_tensors='pt')
 
-        video_frames = self._load_video_frames(
-            video_path)  # load the video frames
-        print(text_inputs)
+        video_frames = self._load_video_frames(path)  # load the video frames
+        print(video_frames)
 
 
 if __name__ == "__main__":
