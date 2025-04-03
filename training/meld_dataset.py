@@ -2,6 +2,7 @@ from torch.utils.data import Dataset
 import pandas as pd
 from transformers import AutoTokenizer
 import os
+import cv2
 
 
 class MELDDataset(Dataset):
@@ -32,6 +33,13 @@ class MELDDataset(Dataset):
             'positive': 2
         }
 
+        def _load_video_frames(self, video_path):
+            # load the video frames using OpenCV
+            cap = cv2.VideoCapture(video_path)
+
+            try:
+                print()
+
     def __len__(self):
         return len(self.data)  # return the length of the dataset
 
@@ -58,6 +66,9 @@ class MELDDataset(Dataset):
         text_inputs = self.tokenizer(row['Utterance'],
                                      padding='max_length', truncation=True, max_length=128,
                                      return_tensors='pt')
+
+        video_frames = self._load_video_frames(
+            video_path)  # load the video frames
         print(text_inputs)
 
 
