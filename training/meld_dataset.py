@@ -47,7 +47,18 @@ class MELDDataset(Dataset):
         if video_path == False:
             raise FileNotFoundError(f"Video file at {path} not found")
 
-        print("File Found")
+        """
+        Here 'self.tokenizer' is referencing the AutoTokenizer class from the transformers library.
+        'utterance' is a column in the dataframe that contains the text data we want to tokenize.
+        'padding' is set to 'max_length' to ensure all sequences are of the same length.
+        'truncation' is set to True to truncate sequences longer than the max length.
+        'max_length' is set to 128, which is the maximum length of the sequences.
+        'return_tensors' is set to 'pt' to return PyTorch tensors.
+        """
+        text_inputs = self.tokenizer(row['Utterance'],
+                                     padding='max_length', truncation=True, max_length=128,
+                                     return_tensors='pt')
+        print(text_inputs)
 
 
 if __name__ == "__main__":
