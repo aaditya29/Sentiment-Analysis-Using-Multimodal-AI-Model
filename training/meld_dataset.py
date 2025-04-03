@@ -1,10 +1,11 @@
 from torch.utils.data import Dataset
-import pandas as pd
 from transformers import AutoTokenizer
-import os
 import numpy as np
-import torch
+import pandas as pd
+import torchaudio
 import subprocess
+import torch
+import os
 import cv2
 
 
@@ -117,6 +118,7 @@ class MELDDataset(Dataset):
                 '-ac', '1',  # number of audio channels
                 audio_path
             ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
         except Exception as e:
             raise ValueError(f"Audio error: {str(e)}")
 
