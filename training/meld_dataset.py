@@ -35,56 +35,56 @@ class MELDDataset(Dataset):
             'positive': 2
         }
 
-        def _load_video_frames(self, video_path):
-            # load the video frames using OpenCV
-            cap = cv2.VideoCapture(video_path)
-            frames = []  # array to store the frames
+    def _load_video_frames(self, video_path):
+        # load the video frames using OpenCV
+        cap = cv2.VideoCapture(video_path)
+        frames = []  # array to store the frames
 
-            try:
-                if not cap.isOpened():  # check if the video is opened
-                    raise ValueError(
-                        f"Could not open video file at {video_path}")
-                # Using Try and reading first frame to validate the video
-                ret, frame = cap.read()  # read the first frame
-                if not ret or frame is None:
-                    raise ValueError(f"Video not found at {video_path}")
+        try:
+            if not cap.isOpened():  # check if the video is opened
+                raise ValueError(
+                    f"Could not open video file at {video_path}")
+            # Using Try and reading first frame to validate the video
+            ret, frame = cap.read()  # read the first frame
+            if not ret or frame is None:
+                raise ValueError(f"Video not found at {video_path}")
 
-                # Resetting index to not skip first frame
-                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # resetting the index to 0
+            # Resetting index to not skip first frame
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # resetting the index to 0
 
-                # reading the frame of first second only
-                while len(frames) < 30 and cap.isOpened():
-                    ret, frame = cap.read()
-                    if not ret:
-                        break
+            # reading the frame of first second only
+            while len(frames) < 30 and cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    break
 
-                    # resize the frame to 224x224
-                    frame = cv2.resize(frame, (224, 224))
-                    frame = frame/255.0  # normalizing the frame
-                    frames.append(frame)  # appending the frame to the list
+                # resize the frame to 224x224
+                frame = cv2.resize(frame, (224, 224))
+                frame = frame/255.0  # normalizing the frame
+                frames.append(frame)  # appending the frame to the list
 
-            except Exception as e:
-                raise ValueError(f"Video error: {str(e)}")
-            finally:
-                cap.release()  # releasing the video capture object
+        except Exception as e:
+            raise ValueError(f"Video error: {str(e)}")
+        finally:
+            cap.release()  # releasing the video capture object
 
-            if (len(frames) == 0):
-                raise ValueError(f"No frames could be extracted")
+        if (len(frames) == 0):
+            raise ValueError(f"No frames could be extracted")
 
-            # Padding or truncating frames
-            if len(frames) < 30:
-                frames += [np.zeros_like(frames[0])] * \
-                    (30 - len(frames))  # padding with zeros
-            else:
-                frames = frames[:30]  # truncating to 30 frames
+        # Padding or truncating frames
+        if len(frames) < 30:
+            frames += [np.zeros_like(frames[0])] * \
+                (30 - len(frames))  # padding with zeros
+        else:
+            frames = frames[:30]  # truncating to 30 frames
 
-            """
-            converting to tensor and changing the order of dimensions and returning the tensor
-            here permute rearranges the original tensor according to the desired ordering and returns a new multidimensional rotated tensor.
-            Before Permute: [frames, height, width, channels]
-            After Permute: [frames, channels, height, width]
-            """
-            return torch.FloatTensor(np.array(frames)).permute(0, 3, 1, 2)
+        """
+        converting to tensor and changing the order of dimensions and returning the tensor
+        here permute rearranges the original tensor according to the desired ordering and returns a new multidimensional rotated tensor.
+        Before Permute: [frames, height, width, channels]
+        After Permute: [frames, channels, height, width]
+        """
+        return torch.FloatTensor(np.array(frames)).permute(0, 3, 1, 2)
 
     def __len__(self):
         return len(self.data)  # return the length of the dataset
@@ -114,6 +114,7 @@ class MELDDataset(Dataset):
                                      return_tensors='pt')
 
         video_frames = self._load_video_frames(path)  # load the video frames
+
         print(video_frames)
 
 
