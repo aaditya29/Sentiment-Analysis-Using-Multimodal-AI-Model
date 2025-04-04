@@ -219,6 +219,9 @@ def collate_fn(batch):  # collate function to combine the data into a batch
     return torch.utils.data.dataloader.default_collate(batch)
 
 
+def prepare_dataloaders(train_csv, train_video_dir, dev_csv, dev_video_dir, test_csv, dev_video_dir, test_csv, test_video_dir, batch_size=32):
+
+
 if __name__ == "__main__":
     meld = MELDDataset('/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_sent_emo.csv',
                        '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_splits_complete')
