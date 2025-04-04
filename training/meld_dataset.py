@@ -119,6 +119,39 @@ class MELDDataset(Dataset):
                 audio_path
             ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
+            waveform, sample_rate = torchaudio.load(
+                audio_path)  # loading the audio file
+
+            if sample_rate != 16000:
+                resampler = torch.transform.Resample(
+                    sample_rate, 16000)  # resampling the audio
+                # here we are resampling the audio by changing the sample rate
+                waveform = resampler(waveform)
+
+            # using mel_spectrogram to measure  represent a signal's loudness, or amplitude, as it varies over time at different frequencies.
+            mel_spectrogram = torchaudio.transforms.MelSpectrogram(
+                sample_rate=16000,
+                n_mels=64,
+                n_fft=1024,
+                hop_length=512
+                # creating the mel spectrogram with the given parameters where sample_rate is 16000, n_mels(number of mel filterbanks) is 64, n_fft is 1024 and hop_length(Length of hop between short time fourier transform STFT window) is 512
+            )
+
+            # applying the mel spectrogram to the waveform
+            mel_spec = mel_spectrogram(waveform)
+
+            # normalizing the mel spectrogram
+            mel_spec = (mel_spec - mel_spec.mean()) / mel_spec.std()
+
+            if mel_spec.size(2) < 300:
+                padding = 300 - mel_spec.size(2)  # padding the mel spectrogram
+                # padding the mel spectrogram where 0 is the left padding and padding is the right padding
+                mel_spec = torch.nn.functional.pad(mel_spec, (0, padding))
+            else:
+                # truncating the mel spectrogram to 300
+                mel_spec = mel_spec[:, :, :300]
+            return mel_spec  # returning the mel spectrogram
+
         except Exception as e:
             raise ValueError(f"Audio error: {str(e)}")
 
