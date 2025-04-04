@@ -151,7 +151,8 @@ class MELDDataset(Dataset):
 
         # video_frames = self._load_video_frames(path)  # load the video frames
         # print(video_frames)
-        self._extract_audio_features(path)
+        audio_features = self._extract_audio_features(path)
+        print(audio_features)
 
 
 if __name__ == "__main__":
