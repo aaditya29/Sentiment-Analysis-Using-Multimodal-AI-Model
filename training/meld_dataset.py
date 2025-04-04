@@ -213,6 +213,12 @@ class MELDDataset(Dataset):
         }  # returning the dictionary containing the text inputs, video frames, audio features, emotion label and sentiment label
 
 
+def collate_fn(batch):  # collate function to combine the data into a batch
+    batch = list(filter(None, batch))
+    # filtering out None samples
+    return torch.utils.data.dataloader.default_collate(batch)
+
+
 if __name__ == "__main__":
     meld = MELDDataset('/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_sent_emo.csv',
                        '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_splits_complete')
