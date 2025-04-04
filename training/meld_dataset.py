@@ -5,8 +5,8 @@ import pandas as pd
 import torchaudio
 import subprocess
 import torch
-import os
 import cv2
+import os
 
 
 class MELDDataset(Dataset):
@@ -165,6 +165,8 @@ class MELDDataset(Dataset):
         return len(self.data)  # return the length of the dataset
 
     def __getitem__(self, idx):
+        if isinstance(idx, torch.Tensor):  # checking if the index is a tensor
+            idx = idx.item()  # converting the tensor to an integer
         row = self.data.iloc[idx]  # get the row at the given index
         video_filename = f"""dia{row['Dialogue_ID']}_utt{
             row['Utterance_ID']}.mp4"""  # get the video filename from the row with dialogue ID and utterance ID
