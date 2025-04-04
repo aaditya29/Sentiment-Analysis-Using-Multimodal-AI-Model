@@ -101,9 +101,9 @@ class MELDDataset(Dataset):
         '-ar', '16000': this sets the audio sample rate to 16,000 Hz (16 kHz) which is commonly used for speech processing tasks.
         '-ac', '1': sets the number of audio channels to 1 (mono audio).
         audio_path: specifies the output file path where the extracted audio will be saved.
-        
+
         Further
-        
+
         check=True ensures that an exception (subprocess.CalledProcessError) is raised if the ffmpeg command fails (i.e., returns a non-zero exit code).
         stdout=subprocess.DEVNULL redirects the standard output (stdout) of the ffmpeg command to DEVNULL, effectively silencing any output from the command.
         stderr=subprocess.DEVNULL redirects the standard error (stderr) of the ffmpeg command to DEVNULL, silencing any error messages.
@@ -152,8 +152,14 @@ class MELDDataset(Dataset):
                 mel_spec = mel_spec[:, :, :300]
             return mel_spec  # returning the mel spectrogram
 
+        except subprocess.CalledProcessError as e:
+            raise ValueError(f"Audio extraction error: {str(e)}")
+
         except Exception as e:
             raise ValueError(f"Audio error: {str(e)}")
+        finally:
+            if os.path.exists(audio_path):
+                os.remove(audio_path)  # remove the audio file after processing
 
     def __len__(self):
         return len(self.data)  # return the length of the dataset
@@ -182,10 +188,27 @@ class MELDDataset(Dataset):
                                      padding='max_length', truncation=True, max_length=128,
                                      return_tensors='pt')
 
-        # video_frames = self._load_video_frames(path)  # load the video frames
+        video_frames = self._load_video_frames(path)  # load the video frames
         # print(video_frames)
         audio_features = self._extract_audio_features(path)
-        print(audio_features)
+        # print(audio_features)
+
+        # Mapping sentiment and emotion labels to the dataset
+        # mapping the emotion label to the dataset
+        emotion_label = self.emotion_map[row['Emotion'].lower()]
+        # mapping the sentiment label to the dataset
+        sentiment_label = self.sentiment_map[row['Sentiment'].lower()]
+
+        return {
+            'text_inputs': {
+                'input_ids': text_inputs['input_ids'].squeeze(),
+                'attention_mask': text_inputs['attention_mask'].squeeze()
+            },
+            'video_frames': video_frames,
+            'audio_features': audio_features,
+            'emotion_label': torch.tensor(emotion_label),
+            'sentiment_label': torch.tensor(sentiment_label)
+        }  # returning the dictionary containing the text inputs, video frames, audio features, emotion label and sentiment label
 
 
 if __name__ == "__main__":
