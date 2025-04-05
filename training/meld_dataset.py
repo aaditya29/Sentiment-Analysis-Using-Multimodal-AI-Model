@@ -253,7 +253,19 @@ def prepare_dataloaders(train_csv, train_video_dir, dev_csv, dev_video_dir, test
     # creating the test dataset
     test_dataset = MELDDataset(test_csv, test_video_dir)
 
-    train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
+    train_loader = DataLoader(
+        # creating the train dataloader
+        train_dataset, batch_size, shuffle=True, collate_fn=collate_fn)
+
+    dev_loader = DataLoader(
+        # creating the dev dataloader
+        dev_dataset, batch_size=batch_size, collate_fn=collate_fn)
+
+    # creating the test dataloader
+    test_loader = DataLoader(
+        test_dataset, batch_size=batch_size, collate_fn=collate_fn)
+
+    return train_loader, dev_loader, test_loader
 
 
 if __name__ == "__main__":
