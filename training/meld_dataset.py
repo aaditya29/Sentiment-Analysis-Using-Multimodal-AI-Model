@@ -221,6 +221,25 @@ class MELDDataset(Dataset):
 
 
 """
+We are making collate_fn which is an optional argument passed to a DataLoader. It tells PyTorch how to combine a list of samples from  Dataset into a single batch.
+
+By default, PyTorch tries to batch the samples using default_collate, which stacks tensors along the first dimension (i.e., creates a batch). But if data samples are:
+- having different shapes
+- if they are not all tensors
+- require custom logic(like filtering out None valuesor padding)
+then we need to define a custom collate function.
+If we consider __getitem__() method returns one sample (like a dict of tensors for text/audio/video). The DataLoader collects multiple such samples then it sends them to collate_fn and then it receives one big batch dict (batched tensors, padded as needed).
+"""
+
+
+def collate_fn(batch):
+    # Filtering out the None values from the batch
+    batch = list(filter(None, batch))
+    # returning the collated batch
+    return torch.utils.data.dataloader.default_collate(batch)
+
+
+"""
 # making function to prepare the dataloaders where train_csv is the path to the train csv file, train_video_dir is the path to the train video directory, dev_csv is the path to the dev csv file, dev_video_dir is the path to the dev video directory, test_csv is the path to the test csv file, test_video_dir is the path to the test video directory and batch_size is the batch size
 """
 
