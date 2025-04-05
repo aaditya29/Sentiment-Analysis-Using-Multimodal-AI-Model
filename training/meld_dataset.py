@@ -1,5 +1,6 @@
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer
+import torch.utils.data.dataloader
 import numpy as np
 import pandas as pd
 import torchaudio
@@ -217,6 +218,23 @@ class MELDDataset(Dataset):
         except Exception as e:
             print(f"Error processing {path}: {str(e)}")
             return None
+
+
+"""
+# making function to prepare the dataloaders where train_csv is the path to the train csv file, train_video_dir is the path to the train video directory, dev_csv is the path to the dev csv file, dev_video_dir is the path to the dev video directory, test_csv is the path to the test csv file, test_video_dir is the path to the test video directory and batch_size is the batch size
+"""
+
+
+def prepare_dataloaders(train_csv, train_video_dir, dev_csv, dev_video_dir, test_csv, test_video_dir, batch_size=32):
+    # creating the train dataset
+    train_dataset = MELDDataset(train_csv, train_video_dir)
+    # creating the dev dataset
+    dev_dataset = MELDDataset(dev_csv, dev_video_dir)
+    # creating the test dataset
+    # creating the test dataset
+    test_dataset = MELDDataset(test_csv, test_video_dir)
+
+    train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
 
 
 if __name__ == "__main__":
