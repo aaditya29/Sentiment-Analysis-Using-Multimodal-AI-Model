@@ -168,83 +168,58 @@ class MELDDataset(Dataset):
         if isinstance(idx, torch.Tensor):  # checking if the index is a tensor
             idx = idx.item()  # converting the tensor to an integer
         row = self.data.iloc[idx]  # get the row at the given index
-        video_filename = f"""dia{row['Dialogue_ID']}_utt{
-            row['Utterance_ID']}.mp4"""  # get the video filename from the row with dialogue ID and utterance ID
+        try:
+            video_filename = f"""dia{row['Dialogue_ID']}_utt{
+                row['Utterance_ID']}.mp4"""  # get the video filename from the row with dialogue ID and utterance ID
 
-        # get the path of the video
-        path = os.path.join(self.video_dir, video_filename)
-        video_path_exists = os.path.exists(path)  # check if the video exists
+            # get the path of the video
+            path = os.path.join(self.video_dir, video_filename)
+            video_path_exists = os.path.exists(
+                path)  # check if the video exists
 
-        if video_path_exists == False:
-            raise FileNotFoundError(f"Video file at {path} not found")
+            if video_path_exists == False:
+                raise FileNotFoundError(f"Video file at {path} not found")
 
-        """
-        Here 'self.tokenizer' is referencing the AutoTokenizer class from the transformers library.
-        'utterance' is a column in the dataframe that contains the text data we want to tokenize.
-        'padding' is set to 'max_length' to ensure all sequences are of the same length.
-        'truncation' is set to True to truncate sequences longer than the max length.
-        'max_length' is set to 128, which is the maximum length of the sequences.
-        'return_tensors' is set to 'pt' to return PyTorch tensors.
-        """
-        text_inputs = self.tokenizer(row['Utterance'],
-                                     padding='max_length', truncation=True, max_length=128,
-                                     return_tensors='pt')
+            """
+            Here 'self.tokenizer' is referencing the AutoTokenizer class from the transformers library.
+            'utterance' is a column in the dataframe that contains the text data we want to tokenize.
+            'padding' is set to 'max_length' to ensure all sequences are of the same length.
+            'truncation' is set to True to truncate sequences longer than the max length.
+            'max_length' is set to 128, which is the maximum length of the sequences.
+            'return_tensors' is set to 'pt' to return PyTorch tensors.
+            """
+            text_inputs = self.tokenizer(row['Utterance'],
+                                         padding='max_length', truncation=True, max_length=128,
+                                         return_tensors='pt')
 
-        video_frames = self._load_video_frames(path)  # load the video frames
-        # print(video_frames)
-        audio_features = self._extract_audio_features(path)
-        # print(audio_features)
+            video_frames = self._load_video_frames(
+                path)  # load the video frames
+            # print(video_frames)
+            audio_features = self._extract_audio_features(path)
+            # print(audio_features)
 
-        # Mapping sentiment and emotion labels to the dataset
-        # mapping the emotion label to the dataset
-        emotion_label = self.emotion_map[row['Emotion'].lower()]
-        # mapping the sentiment label to the dataset
-        sentiment_label = self.sentiment_map[row['Sentiment'].lower()]
+            # Mapping sentiment and emotion labels to the dataset
+            # mapping the emotion label to the dataset
+            emotion_label = self.emotion_map[row['Emotion'].lower()]
+            # mapping the sentiment label to the dataset
+            sentiment_label = self.sentiment_map[row['Sentiment'].lower()]
 
-        return {
-            'text_inputs': {
-                'input_ids': text_inputs['input_ids'].squeeze(),
-                'attention_mask': text_inputs['attention_mask'].squeeze()
-            },
-            'video_frames': video_frames,
-            'audio_features': audio_features,
-            'emotion_label': torch.tensor(emotion_label),
-            'sentiment_label': torch.tensor(sentiment_label)
-        }  # returning the dictionary containing the text inputs, video frames, audio features, emotion label and sentiment label
-
-
-def collate_fn(batch):  # collate function to combine the data into a batch
-    batch = list(filter(None, batch))
-    # filtering out None samples
-    return torch.utils.data.dataloader.default_collate(batch)
-
-
-def prepare_dataloaders(train_csv, train_video_dir, dev_csv, dev_video_dir, test_csv, dev_video_dir, test_csv, test_video_dir, batch_size=32):
-    train_dataset = MELDDataset(train_csv, train_video_dir)
-    dev_dataset = MELDDataset(dev, dev_video_dir)
-    test_dataset = MELDDataset(test_csv, test_video_dir)
-
-    train_loader = DataLoader(train_dataset,
-                              batch_size=batch_size,
-                              shuffle=True,
-                              collate_fn=collate_fn)
-    dev_loader = DataLoader(
-        dev_dataset, batch_size=batch_size, collate_fn=collate_fn)
-
-    test_loader = DataLoader(test_dataset, batch_size=batch_size,
-                             collate_fn=collate_fn)
-
-    return train_loader, dev_loader, test_loader
+            return {
+                'text_inputs': {
+                    'input_ids': text_inputs['input_ids'].squeeze(),
+                    'attention_mask': text_inputs['attention_mask'].squeeze()
+                },
+                'video_frames': video_frames,
+                'audio_features': audio_features,
+                'emotion_label': torch.tensor(emotion_label),
+                'sentiment_label': torch.tensor(sentiment_label)
+            }  # returning the dictionary containing the text inputs, video frames, audio features, emotion label and sentiment label
+        except Exception as e:
+            print(f"Error processing {path}: {str(e)}")
+            return None
 
 
 if __name__ == "__main__":
     meld = MELDDataset('/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_sent_emo.csv',
                        '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_splits_complete')
-
-    for batch in train_loader:
-        print(batch['text_inputs'])
-        print(batch['video_frames'].shape)
-        print(batch['audio_features'].shape)
-        print(batch['emotion_label'])
-        print(batch['sentiment_label'])
     print(meld[0])
