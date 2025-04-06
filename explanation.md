@@ -713,9 +713,9 @@ These layers **transform** data but don't have trainable weights.
 
 - Applies normalization **across batches**.
 - For each feature channel, subtracts the batch mean and divides by the batch std dev:
-  \[
+  $[
   x\_{\text{norm}} = \frac{x - \mu}{\sigma}
-  \]
+  ]$
 - **Input**: `[1, 2, 3, 4]`  
   **Output**: Normalized values like `[0.2, 0.5, -0.3, 1.1]`
 - Helps in faster convergence, more stable training.
