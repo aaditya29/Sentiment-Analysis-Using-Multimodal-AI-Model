@@ -627,3 +627,97 @@ The model makes separate predictions for two tasks:
 - Training
 - Evaluation
 - Deployment
+
+## Model Architecture: Multimodal Emotion Recognition (Training Layers)
+
+This architecture uses a combination of **trainable**, **functional**, and **normalization** layers provided by PyTorch for processing audio/text/video input for sentiment/emotion classification.
+
+---
+
+### Layer Overview
+
+| Layer Type               | Example Layers                                      | Role                                        |
+| ------------------------ | --------------------------------------------------- | ------------------------------------------- |
+| **Trainable Layers**     | `Linear`, `Conv1d`                                  | Learn parameters (weights) from data        |
+| **Functional Layers**    | `ReLU`, `Dropout`, `MaxPool1d`, `AdaptiveAvgPool1d` | Transform/intermediate ops without learning |
+| **Normalization Layers** | `BatchNorm1d`                                       | Normalize activations during training       |
+
+---
+
+### Layer-by-Layer Explanation
+
+---
+
+#### 1. **Trainable Layers**
+
+These are the core learning components in the model.
+
+##### `Linear` Layer
+
+- Also called a **fully connected layer**.
+- Used at the classification stage.
+- Learns a weight matrix `W` and bias `b` to compute:
+  $[
+  y = Wx + b
+  ]$
+- **Usage**: Final output layer mapping features to emotion classes (e.g., 7 outputs for 7 emotions).
+
+##### `Conv1d`
+
+- Applies 1D convolution across **sequential data**.
+- Ideal for extracting local temporal features from audio/text sequences.
+- Learns filters (kernels) that slide across input with learned weights.
+- **Example use-case**: Speech/audio processing from MELD dataset.
+
+---
+
+#### 2. **Functional Layers (Non-learnable)**
+
+These layers **transform** data but don't have trainable weights.
+
+##### `ReLU` (Rectified Linear Unit)
+
+- Applies non-linearity:  
+  $[
+  \text{ReLU}(x) = \max(0, x)
+  ]$
+- **Input**: `[-2, -1, 0, 1, 2]`  
+  **Output**: `[ 0,  0, 0, 1, 2]`
+- Allows model to learn complex patterns.
+
+##### `Dropout`
+
+- **Prevents overfitting** by randomly turning off neurons during training.
+- Keeps only a fraction of activations active (e.g., `p=0.5` drops half).
+- Helps generalize better on unseen data.
+
+##### `MaxPool1d`
+
+- Reduces sequence size by selecting **maximum value** from non-overlapping windows.
+- **Input**: `[1, 2, 3, 4]`, kernel size = 2  
+  **Output**: `[2, 4]`
+- Only strongest features are passed forward.
+
+##### `AdaptiveAvgPool1d`
+
+- Dynamically resizes input to a **target output size** by averaging.
+- **Input**: `[1, 2, 3, 4]`, output size = 1  
+  **Output**: `[2.5]` (average of all elements)
+- Useful when input sequence length is variable and we want a fixed-sized representation.
+
+---
+
+#### ⚖️ 3. **Normalization Layers**
+
+##### `BatchNorm1d`
+
+- Applies normalization **across batches**.
+- For each feature channel, subtracts the batch mean and divides by the batch std dev:
+  \[
+  x\_{\text{norm}} = \frac{x - \mu}{\sigma}
+  \]
+- **Input**: `[1, 2, 3, 4]`  
+  **Output**: Normalized values like `[0.2, 0.5, -0.3, 1.1]`
+- Helps in faster convergence, more stable training.
+
+---
