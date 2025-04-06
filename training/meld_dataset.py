@@ -277,6 +277,6 @@ def prepare_dataloaders(train_csv, train_video_dir, dev_csv, dev_video_dir, test
 
 
 if __name__ == "__main__":
-    meld = MELDDataset('/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_sent_emo.csv',
-                       '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_splits_complete')
-    print(meld[0])
+    train_loader, dev_loader, test_loader = prepare_dataloaders(
+        '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/train/train_sent_emo.csv', '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/train/train_splits', '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_sent_emo.csv', '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/dev/dev_splits_complete',
+        '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/test/test_sent_emo.csv', '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/test/output_repeated_splits_test')
