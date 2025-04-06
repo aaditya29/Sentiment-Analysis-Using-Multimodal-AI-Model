@@ -8,6 +8,7 @@ import subprocess
 import torch
 import cv2
 import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 class MELDDataset(Dataset):
