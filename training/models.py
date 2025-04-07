@@ -7,6 +7,6 @@ import torch
 import os
 
 
-class MultimodalSentimentModel(nn.Module):
+class TextEncoder(nn.Module):
     def __init__(self):
-        super().__init__()  # accessing the parent class constructor using super()
+        super().__init__()
