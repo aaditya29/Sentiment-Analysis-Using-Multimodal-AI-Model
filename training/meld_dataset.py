@@ -132,12 +132,15 @@ class MELDDataset(Dataset):
                 waveform = resampler(waveform)
 
             # using mel_spectrogram to measure  represent a signal's loudness, or amplitude, as it varies over time at different frequencies.
+            # creating the mel spectrogram with the given parameters where sample_rate is 16000,
+            # n_mels(number of mel filterbanks) is 64, n_fft is 1024 and
+            # hop_length(Length of hop between short time fourier transform STFT window) is 512
             mel_spectrogram = torchaudio.transforms.MelSpectrogram(
                 sample_rate=16000,
                 n_mels=64,
                 n_fft=1024,
                 hop_length=512
-                # creating the mel spectrogram with the given parameters where sample_rate is 16000, n_mels(number of mel filterbanks) is 64, n_fft is 1024 and hop_length(Length of hop between short time fourier transform STFT window) is 512
+
             )
 
             # applying the mel spectrogram to the waveform
