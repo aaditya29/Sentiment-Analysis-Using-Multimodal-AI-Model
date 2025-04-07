@@ -327,10 +327,10 @@ This produces a **2D tensor**, reducing dimensionality while keeping important f
 
 ### Training from Scratch vs. Transfer Learning
 
-| Approach                  | Pros                                                                                       | Cons                                                                              |
-| ------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| **Training from Scratch** | ✅ Full control: optimization for a specific task <br> ✅ Smaller model                    | ❌ Requires more data <br> ❌ Needs more training time <br> ❌ Might underperform |
-| **Transfer Learning**     | ✅ Better initial performance <br> ✅ Less data needed <br> ✅ Architecture already proven | ❌ Larger model size <br> ❌ May not fit the task                                 |
+| Approach                  | Pros                                                                              | Cons                                                                     |
+| ------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Training from Scratch** | Full control: optimization for a specific task <br> Smaller model                 | Requires more data <br> Needs more training time <br> Might underperform |
+| **Transfer Learning**     | Better initial performance <br> Less data needed <br> Architecture already proven | Larger model size <br> May not fit the task                              |
 
 ---
 
@@ -340,12 +340,12 @@ This produces a **2D tensor**, reducing dimensionality while keeping important f
 
 ### Without a Pre-Trained Model:
 
-❌ No difference between a "bank with money" and "a riverbank".  
- Both are encoded the same way without context.
+No difference between a "bank with money" and "a riverbank".  
+Both are encoded the same way without context.
 
 #### With a Pre-Trained Model:
 
-✅ The output reflects the specific meaning of "bank".  
+The output reflects the specific meaning of "bank".  
  More context is preserved.
 
 ---
@@ -354,12 +354,12 @@ This produces a **2D tensor**, reducing dimensionality while keeping important f
 
 #### Without a Pre-Trained Model:
 
-❌ Simple brightness changes over time (e.g., brightness goes up, then down).
+Simple brightness changes over time (e.g., brightness goes up, then down).
 
 #### With a Pre-Trained Model:
 
-✅ Recognizes complex patterns like a person nodding their head while smiling.  
-✅ Identifies hand waves from motion, smiles from facial features, and nods from sequences.
+Recognizes complex patterns like a person nodding their head while smiling.  
+Identifies hand waves from motion, smiles from facial features, and nods from sequences.
 
 ## Architecture of the Model
 
