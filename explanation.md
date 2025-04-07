@@ -865,3 +865,137 @@ We now predict two things independently from the same fused representation.
 | `Fusion Layer`      | Combines video, audio, and text into one representation      |
 
 ---
+
+Great! Based on both your previously shared summary image and the new uploaded flowchart image (which I’ve analyzed), here’s a **deep, step-by-step explanation** of the **Optimizer**, **Loss Function**, and **Learning Rate Scheduler** in a form **suitable for a `README.md`**, blending conceptual depth and practical usability.
+
+---
+
+## Optimizer, Loss Function & Learning Rate Scheduler
+
+### Optimizer — `Adam`
+
+An **optimizer** adjusts the parameters (weights & biases) of your neural network to minimize the **loss**. It uses the **gradients** computed during backpropagation to decide **how much and in which direction** to change each parameter.
+
+---
+
+### Why Adam?
+
+> **Adam = Adaptive Moment Estimation**  
+> It combines the **momentum** method (which remembers past gradients) and **RMSProp** (which adapts learning rates for each parameter).
+
+### How it works (Flow-style breakdown):
+
+1. **Initialize parameters**: `θ`, `m = 0`, `v = 0` (momentum & RMS terms)
+2. **Compute gradient** `g` using backpropagation
+3. **Update biased first moment**:  
+   `m = β₁ * m + (1 - β₁) * g`
+4. **Update biased second moment**:  
+   `v = β₂ * v + (1 - β₂) * g²`
+5. **Bias correction**:  
+   `m̂ = m / (1 - β₁^t)`, `v̂ = v / (1 - β₂^t)`
+6. **Update parameters**:  
+   `θ = θ - α * m̂ / (√v̂ + ε)`
+
+Where:
+
+- `β₁ = 0.9`, `β₂ = 0.999`, `ε = 1e-8` typically
+- `α` is the **learning rate**
+
+---
+
+#### PyTorch Code Example:
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+model = nn.Linear(10, 2)  # simple model
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+```
+
+---
+
+### Loss Function — `CrossEntropyLoss`
+
+A **loss function** measures how far your model’s predictions are from the actual labels. During training, the model learns to minimize this.
+
+---
+
+#### Why CrossEntropy for Classification?
+
+> It's the **go-to loss** for **multi-class classification** problems.  
+> It is an upgraded version of **Mean Squared Error**, but for class probabilities.
+
+---
+
+#### Intuition:
+
+1. **Input**: Model outputs **logits** (not softmaxed)
+2. **Apply LogSoftmax internally**
+3. **Compare to target class** (as integers, not one-hot vectors)
+4. **Loss increases** if predicted class is far from the correct one
+
+Mathematically:
+
+$[
+\text{Loss} = -\log(p\_{\text{true class}})
+]$
+
+---
+
+#### PyTorch Code Example:
+
+```python
+criterion = nn.CrossEntropyLoss()
+
+# Suppose logits are model output for 3 classes, and label is class 2
+output = torch.tensor([[1.2, 0.5, 2.1]])  # shape: (batch_size, num_classes)
+target = torch.tensor([2])               # correct class index
+loss = criterion(output, target)
+print(loss.item())
+```
+
+---
+
+### Learning Rate Scheduler — `ReduceLROnPlateau`
+
+> A **static learning rate** may not always help you reach the optimum.  
+> If the model **stalls**, it's better to **lower** the learning rate to let it make **finer adjustments**.
+
+---
+
+#### Flow Breakdown:
+
+1. Monitor a metric (usually validation loss or accuracy).
+2. If it **doesn’t improve** for N epochs (called **patience**), reduce the learning rate.
+3. Shrink LR by a **factor** (e.g., 0.1 or 0.5)
+4. Continue training with the new, smaller LR.
+
+---
+
+#### PyTorch Code Example:
+
+```python
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min',
+                                                 factor=0.1, patience=2,
+                                                 verbose=True)
+
+for epoch in range(20):
+    train(...)  # your training loop
+    val_loss = validate(...)  # compute validation loss
+
+    scheduler.step(val_loss)  # scheduler takes validation loss to monitor
+```
+
+---
+
+#### Summary Table
+
+| Component               | PyTorch Class         | Role                                                                |
+| ----------------------- | --------------------- | ------------------------------------------------------------------- |
+| Optimizer               | `torch.optim.Adam`    | Updates weights using gradients; adapts learning rate per parameter |
+| Loss Function           | `nn.CrossEntropyLoss` | Compares predictions with actual labels for classification tasks    |
+| Learning Rate Scheduler | `ReduceLROnPlateau`   | Reduces LR if model stagnates                                       |
+
+---
