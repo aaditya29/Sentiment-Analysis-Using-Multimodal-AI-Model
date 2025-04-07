@@ -721,3 +721,147 @@ These layers **transform** data but don't have trainable weights.
 - Helps in faster convergence, more stable training.
 
 ---
+
+## Specific Model Architecture
+
+This model performs **emotion** and **sentiment** classification using **video**, **audio**, and **text** as inputs. It extracts meaningful features from each modality, fuses them together, and uses two heads to make predictions — one for emotion and one for sentiment.
+
+---
+
+### Modal-Specific Encoders (Feature Extraction)
+
+#### 1. **Video Encoder**
+
+**Goal:** Extract visual features from sequences of frames in videos (e.g., facial expressions).
+
+**Steps:**
+
+1. **Input shape**: `[batch_size, channels, frames, height, width]`.
+2. **3D Convolutional Model** (e.g., pretrained model like ResNet3D): Extracts features across time and space.
+3. **Linear Layer** → reduces high-dimensional embeddings to a fixed-size vector (`128`).
+4. **ReLU Activation** → introduces non-linearity.
+5. **Dropout (p=0.2)** → helps prevent overfitting by randomly deactivating neurons during training.
+
+**Output shape:** `[batch_size, 128]` (fixed-size vector per video)
+
+---
+
+### 2. **Text Encoder**
+
+**Goal:** Understand language patterns and extract context-aware text embeddings.
+
+**Steps:**
+
+1. **Input:** `input_ids`, `attention_mask` (standard inputs to a BERT model).
+2. **Pretrained BERT**: Extracts semantic features from the input sentence.
+3. **Projection Layer**: A `Linear` layer to reduce BERT's output (usually 768-dim) to a fixed `128`-dim representation.
+
+**Output shape:** `[batch_size, 128]` (fixed-size vector per sentence)
+
+---
+
+### 3. **Audio Encoder**
+
+**Goal:** Extract features from audio signals (tone, pitch, rhythm, etc.).
+
+**Steps:**
+
+1. **Input shape:** `[batch_size, 1, time_steps]` — mono audio input.
+2. **Conv1d Layer** → detects basic patterns in short chunks of the audio.
+3. **BatchNorm1d** → normalizes the activations, speeding up training and stabilizing learning.
+4. **ReLU Activation** → adds non-linearity.
+5. **MaxPool1d** → keeps only the strongest features, reducing input length by half.
+6. **Conv1d (again)** → deeper patterns from pooled output.
+7. **BatchNorm1d + ReLU** → stabilizes and transforms features again.
+8. **AdaptiveAvgPool1d** → compresses along time dimension to 1 value per channel.
+9. **Linear Layer** → maps pooled audio to `128`-dim.
+10. **ReLU + Dropout (p=0.2)** → same as above, adds non-linearity and regularization.
+
+**Output shape:** `[batch_size, 128]`
+
+---
+
+### Fusion Layer
+
+**Goal:** Combine features from all three modalities into a unified representation.
+
+**Steps:**
+
+1. **Concatenate** the `[batch_size, 128]` embeddings from video, text, and audio → `[batch_size, 384]`
+2. **Linear Layer (384 → 256)** → reduces the combined feature size to a manageable dimension.
+3. **BatchNorm1d** → normalizes fused features.
+4. **ReLU Activation** → adds non-linearity.
+5. **Dropout (p=0.3)** → combats overfitting by randomly dropping features.
+
+**Output shape:** `[batch_size, 256]` — shared multimodal representation.
+
+---
+
+### Dual Classification Heads
+
+We now predict two things independently from the same fused representation.
+
+---
+
+### Emotion Classifier
+
+**Task:** Predict 1 of 7 emotion categories (e.g., happy, sad, angry, etc.).
+
+**Steps:**
+
+1. **Linear Layer (256 → 64)** → learns complex combinations of fused features.
+2. **ReLU + Dropout (p=0.2)** → regularization and non-linearity.
+3. **Linear Layer (64 → 7)** → outputs class logits (7 emotions).
+
+---
+
+### Sentiment Classifier
+
+**Task:** Predict 1 of 3 sentiment classes (positive, neutral, negative).
+
+**Steps:**
+
+1. **Linear Layer (256 → 64)** → similar to emotion head.
+2. **ReLU + Dropout (p=0.2)**.
+3. **Linear Layer (64 → 3)** → outputs class logits (3 sentiments).
+
+---
+
+### Why This Architecture?
+
+| Component             | Purpose                                                                     |
+| --------------------- | --------------------------------------------------------------------------- |
+| **Modal encoders**    | Extract unique, meaningful patterns from each type of data                  |
+| **Projection layers** | Convert everything to a common size to make fusion possible                 |
+| **Fusion layer**      | Learn relationships between video, text, and audio                          |
+| **Two heads**         | Enables joint learning of emotion and sentiment, potentially improving both |
+
+---
+
+### Key Design Choices Explained
+
+| Feature             | Why it Matters                                               |
+| ------------------- | ------------------------------------------------------------ |
+| `Dropout`           | Prevents overfitting and encourages generalization           |
+| `ReLU`              | Adds flexibility by introducing non-linear behavior          |
+| `BatchNorm1d`       | Stabilizes learning and improves convergence                 |
+| `AdaptiveAvgPool1d` | Converts variable-length audio into fixed-size features      |
+| `Dual-head outputs` | Allows one model to do both sentiment and emotion prediction |
+
+---
+
+### Summary: Layer Responsibilities
+
+| Layer Type          | Role                                                         |
+| ------------------- | ------------------------------------------------------------ |
+| `Conv1D`            | Learns local patterns in audio                               |
+| `BatchNorm1D`       | Normalizes features for stable training                      |
+| `ReLU`              | Adds non-linearity, allows network to learn complex patterns |
+| `Dropout`           | Prevents overfitting by randomly disabling neurons           |
+| `Linear`            | Learns weighted combinations of features                     |
+| `MaxPool1D`         | Keeps only strongest features (reduces size)                 |
+| `AdaptiveAvgPool1D` | Averages across time to get fixed-size output                |
+| `BERT`              | Captures language meaning, word context                      |
+| `Fusion Layer`      | Combines video, audio, and text into one representation      |
+
+---
