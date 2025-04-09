@@ -108,14 +108,10 @@ class AudioEncoder(nn.Module):
         )
 
     def forward(self, x):
-        x = x.squeeze(1)
+        x = x.squeeze(1)  # removing the channel dimension by squeezing it
 
-
-# testing dummy mel spectrogram
-if __name__ == "__main__":
-    batch_size = 2
-    x = torch.randn(batch_size, 1, 64, 300)
-    print(f"1. Input Shape: {x.shape}")
-
-    x_squeezed = x.squeeze(1)
-    print(f"2. Squeezed Shape : {x_squeezed.shape}")
+        # features output: [batch_size, 128, 1]
+        # passing the input through conv layers and pooling so that each example has 128 channels of learned features across time (shrunk to 1 step)
+        features = self.conv_layers(x)
+        # squeezing out the last dimension to the 1 time step so it's [batch_size, 128]
+        return self.projection(features.squeeze(-1))
