@@ -109,3 +109,13 @@ class AudioEncoder(nn.Module):
 
     def forward(self, x):
         x = x.squeeze(1)
+
+
+# testing dummy mel spectrogram
+if __name__ == "__main__":
+    batch_size = 2
+    x = torch.randn(batch_size, 1, 64, 300)
+    print(f"1. Input Shape: {x.shape}")
+
+    x_squeezed = x.squeeze(1)
+    print(f"2. Squeezed Shape : {x_squeezed.shape}")
