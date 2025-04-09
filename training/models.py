@@ -127,6 +127,14 @@ class MultiModalSentimentModel(nn.Module):
         self.audio_encoder = AudioEncoder()
 
         # building fusion layers
+        """
+        Here we are combining the features from all three modalities (text, video, and audio) into a single representation
+        128 * 3 = 384 makes the 3 encoders each output 128-dim vectors.
+        nn.Linear(384, 256) compresses this into a 256-dim fused representation.
+        BatchNorm1d(256) normalizes values across the batch for stability.
+        ReLU() adds non-linearity, allowing the model to learn complex relationships.
+        Dropout(0.3) randomly drops 30% of values during training to avoid overfitting.
+        """
         self.fusion_layer = nn.Sequential(
             nn.Linear(128*3, 256),
             nn.BatchNorm1d(256),
@@ -147,3 +155,34 @@ class MultiModalSentimentModel(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(64, 3)  # positive, negative and neutral
         )
+
+    # Defining forward pass
+    def forward(self, text_inputs, video_frames, audio_features):
+        # extracting features from each modality
+        text_features = self.text_encoder(
+            text_inputs['input_ids'],
+            text_inputs['attention_mask'],
+        )
+        video_features = self.video_encoder(
+            video_frames)  # declaring the video features
+        audio_features = self.audio_encoder(
+            audio_features)  # declaring the audio features
+
+        # concatenating the features from all three modalities along the feature dimension [batch_size, 128*3]
+        combined_features = torch.cat([
+            text_features,
+            video_features,
+            audio_features
+        ], dim=1)
+
+        # passing the combined vector through the fusion layer
+        fused_features = self.fusion_layer(combined_features)
+        # Outputs shape: [batch_size, 7]
+        emotion_output = self.emotion_classifier(fused_features)
+        # Outputs shape: [batch_size, 3]
+        sentiment_output = self.sentiment_classifer(fused_features)
+
+        return {
+            'emotions': emotion_output,
+            'sentiments': sentiment_output
+        }
