@@ -115,3 +115,20 @@ class AudioEncoder(nn.Module):
         features = self.conv_layers(x)
         # squeezing out the last dimension to the 1 time step so it's [batch_size, 128]
         return self.projection(features.squeeze(-1))
+
+
+class MultiModalSentimentModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        # initializing the encoders
+        self.text_encoder = TextEncoder()
+        self.video_encoder = VideoEncoder()
+        self.audio_encoder = AudioEncoder()
+
+        # building fusion layers
+        self.fusion_layer = nn.Sequential(
+            nn.Linear(128*3, 256),
+            nn.BatchNorm1d(256),
+            nn.ReLU(),
+            nn.Dropout(0.3))
