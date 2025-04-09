@@ -2,3 +2,4 @@
 .DS_Store
 MELD.Raw.tar.gz
 dataset.Raw
+training/__pycache__
