@@ -186,3 +186,47 @@ class MultiModalSentimentModel(nn.Module):
             'emotions': emotion_output,
             'sentiments': sentiment_output
         }
+
+
+if __name__ == "__main__":
+    dataset = MELDDataset(
+        '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/train/train_sent_emo.csv',
+        '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/train/train_splits')
+
+    sample = dataset[0]  # getting the first sample
+
+    model = MultiModalSentimentModel()  # initializing the model
+    model.eval()  # setting the model to evaluation mode
+
+    # dictionary containing result sample
+    text_inputs = {
+        'input_ids': sample['text_inputs']['input_ids'].unsqueeze(0),
+        'attention_mask': sample['text_inputs']
+        ['attention_mask'].unsqueeze(0)
+    }
+    # unsqueeze to add batch dimension
+    video_frames = sample['video_frames'].unsqueeze(0)
+    audio_features = sample['audio_features'].unsqueeze(0)
+
+    # loading the model weights
+    with torch.inference_mode():
+        outputs = model(text_inputs, video_frames, audio_features)
+
+        emotion_probs = torch.softmax(outputs['emotions'], dim=1)[0]
+        sentiment_probs = torch.softmax(outputs['sentiments'], dim=1)[0]
+
+    emotion_map = {
+        0: 'anger', 1: 'disgust', 2: 'fear', 3: 'joy', 4: 'neutral', 5: 'sadness', 6: 'surprise'
+    }
+
+    sentiment_map = {
+        0: 'negative', 1: 'neutral', 2: 'positive'
+    }
+
+    for i, prob in enumerate(emotion_probs):
+        print(f"{emotion_map[i]}: {prob:.4f}")
+
+    for i, prob in enumerate(sentiment_probs):
+        print(f"{sentiment_map[i]}: {prob:.2f}")
+
+    print("Predictions for utterance: ")
