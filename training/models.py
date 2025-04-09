@@ -18,3 +18,11 @@ class TextEncoder(nn.Module):
 
         # projecting the BERT output to a lower dimension
         self.projection = nn.Linear(768, 128)
+
+    def forward(self, input_ids, attention_mask):
+        # Extracting BERT features
+        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+
+        pooler_output = outputs.pooler_output
+
+        return self.projection(pooler_output)  # project to lower dimension
