@@ -132,3 +132,18 @@ class MultiModalSentimentModel(nn.Module):
             nn.BatchNorm1d(256),
             nn.ReLU(),
             nn.Dropout(0.3))
+
+        # Building classification heads of emotional and sentiment classification
+        self.emotion_classifier = nn.Sequential(
+            nn.Linear(256, 64),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(64, 7)  # sadness and anger
+        )
+
+        self.sentiment_classifer = nn.Sequential(
+            nn.Linear(256, 64),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(64, 3)  # positive, negative and neutral
+        )
