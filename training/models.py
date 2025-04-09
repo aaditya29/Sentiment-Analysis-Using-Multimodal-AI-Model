@@ -61,3 +61,51 @@ class VideoEncoder(nn.Module):
         # [batch_size, frames, channels, height, width]->[batch_size, channels, frames, height, width]
         x = x.transpose(1, 2)  # transposing time and channel axes
         return self.backbone(x)
+
+
+class AudioEncoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        """
+        Defining a sequence of layers that extract temporal patterns from audio using 1D convolutions.
+        1. nn.Conv1d(64, 64, kernel_size=3): Applies a 1D convolution with 64 input and output channels.
+        2. nn.BatchNorm1d(64): Normalizes the output of the convolution to stabilize training.
+        3. nn.ReLU(): Applies a non-linear activation function to introduce non-linearity.
+        4. nn.MaxPool1d(2): Reduces the dimensionality of the output by taking the maximum value in each 2-element window.
+        5. nn.Conv1d(64, 128, kernel_size=3): Applies another 1D convolution with 128 output channels.
+        6. nn.BatchNorm1d(128): Normalizes the output of the second convolution.
+        7. nn.ReLU(): Applies another non-linear activation function.
+        8. nn.AdaptiveAvgPool1d(1): Reduces the output to a fixed size of 1 for each channel, regardless of the input size.
+        """
+        self.conv_layers = nn.Sequential(
+            # writing lower level features
+            nn.Conv1d(64, 64, kernel_size=3),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+            nn.MaxPool1d(2),
+            # writing higher level features
+            nn.Conv1d(64, 128, kernel_size=3),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.AdaptiveAvgPool1d(1)
+        )
+
+        for param in self.conv_layers.parameters():
+            param.requires_grad = False
+
+        """
+        Here we project the 128D audio embedding into a final form.
+
+        Linear(128, 128) maps features to same size.
+        ReLU() allows non-linearity.
+        Dropout(0.2) randomly zeroes 20% of neurons during training to avoid overfitting.
+        """
+        self.projection = nn.Sequential(
+            nn.Linear(128, 128),
+            nn.ReLU(),
+            nn.Dropout(0.2)
+        )
+
+    def forward(self, x):
+        x = x.squeeze(1)
