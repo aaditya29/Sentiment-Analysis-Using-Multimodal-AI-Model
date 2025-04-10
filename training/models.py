@@ -188,6 +188,25 @@ class MultiModalSentimentModel(nn.Module):
         }
 
 
+class MultiModalTrainer:
+    def __init__(self, model, train_loader, val_loader):
+        self.model = model  # initializing the model
+        self.train_loader = train_loader  # initializing the training data loader
+        self.val_loader = val_loader  # initializing the validation data loader
+
+        # Logging dataset size
+        # getting the size of the training dataset
+        train_size = len(train_loader.dataset)
+        # getting the size of the validation dataset
+        val_size = len(val_loader.dataset)
+        print("\n Dataset sizes: ")
+        print(f"Training samples: {train_size, }")
+        print(f"Validation samples: {val_size, }")
+        print(f"Batches per epoch: {len(train_loader):, }")
+
+        # Very high: 1, high: 0.1-0.01, medium: 1e-1, low: 1e-4, very low: 1e-5
+
+
 if __name__ == "__main__":
     dataset = MELDDataset(
         '/Users/adityamishra/Documents/AI-Sentiment-Analyser/dataset.Raw/train/train_sent_emo.csv',
