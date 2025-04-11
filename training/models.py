@@ -214,6 +214,14 @@ class MultiModalTrainer:
             {'params': model.sentiment_classifier.parameters(), 'lr': 5e-4}
         ], weight_decay=1e-5)
 
+        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer, mode='min', factor=0.1, patience=2)
+
+        self.emotion_criterion = nn.CrossEntropyLoss(
+            label_smoothing=0.05, weight=self.emotion_weights)
+        self.sentiment_criterion = nn.CrossEntropyLoss(
+            label_smoothing=0.05, weight=self.sentiment_weights)
+
 
 if __name__ == "__main__":
     dataset = MELDDataset(
