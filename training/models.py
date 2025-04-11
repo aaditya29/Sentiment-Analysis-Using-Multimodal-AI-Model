@@ -205,6 +205,14 @@ class MultiModalTrainer:
         print(f"Batches per epoch: {len(train_loader):, }")
 
         # Very high: 1, high: 0.1-0.01, medium: 1e-1, low: 1e-4, very low: 1e-5
+        self.optimizer = torch.optim.Adam([
+            {'params': model.text_encoder.parameters(), 'lr': 8e-6},
+            {'params': model.video_encoder.parameters(), 'lr': 8e-5},
+            {'params': model.audio_encoder.parameters(), 'lr': 8e-5},
+            {'params': model.fusion_layer.parameters(), 'lr': 5e-4},
+            {'params': model.emotion_classifier.parameters(), 'lr': 5e-4},
+            {'params': model.sentiment_classifier.parameters(), 'lr': 5e-4}
+        ], weight_decay=1e-5)
 
 
 if __name__ == "__main__":
