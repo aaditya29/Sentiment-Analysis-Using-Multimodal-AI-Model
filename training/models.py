@@ -222,6 +222,19 @@ class MultiModalTrainer:
         self.sentiment_criterion = nn.CrossEntropyLoss(
             label_smoothing=0.05, weight=self.sentiment_weights)
 
+    def train_epoch(self):
+        self.model.train()
+        running_loss = {'total': 0.0, 'emotion': 0.0, 'sentiment': 0.0}
+
+        for batch in self.train_loader:
+            device = next(self.model.parameters()).device
+            text_inputs = {
+                'input_ids': batch['text_inputs']
+                ['input_ids'].to(device),
+                'attention_mask': batch['text_inputs']
+                ['attention_mask'].to(device)
+            }
+
 
 if __name__ == "__main__":
     dataset = MELDDataset(
