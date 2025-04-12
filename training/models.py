@@ -244,6 +244,11 @@ class MultiModalTrainer:
             outputs = self.model(text_inputs, video_frames, audio_features)
 
             # calculating the loss using the raw logits
+            emotion_loss = self.emotion_criterion(
+                outputs['emotions'], emotion_labels)
+            sentiment_loss = self.sentiment_criterion(
+                outputs['sentiments'], sentiment_labels)
+            total_losts = emotion_loss + sentiment_loss
 
 
 if __name__ == "__main__":
