@@ -249,6 +249,8 @@ class MultiModalTrainer:
         """
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer, mode='min', factor=0.1, patience=2)
+
+        self.current_train_losses = None  # initializing the current training losses
         """
         Here we are defining the loss functions for emotion and sentiment classification.
         CrossEntropyLoss is used for multi-class classification (emotions/sentiments)
@@ -258,6 +260,12 @@ class MultiModalTrainer:
             label_smoothing=0.05, weight=self.emotion_weights)
         self.sentiment_criterion = nn.CrossEntropyLoss(
             label_smoothing=0.05, weight=self.sentiment_weights)
+
+    def log_metrics(self, losses, metrics=None, phase="train"):
+        if phase == "train":  # logging training metrics
+            self.current_train_losses = losses  # updating the current training losses
+        else:  # validation metrics
+            print("")
 
     def train_epoch(self):
         self.model.train()  # switching the model to training mode
