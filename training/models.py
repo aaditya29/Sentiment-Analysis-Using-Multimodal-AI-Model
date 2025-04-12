@@ -1,7 +1,10 @@
 from sklearn.metrics import precision_score, accuracy_score
+from torch.utils.tensorboard import SummaryWriter
 from torchvision import models as vision_models
 from meld_dataset import MELDDataset
 from transformers import BertModel
+
+
 from datetime import datetime
 import torch.nn as nn
 import torch
@@ -203,6 +206,17 @@ class MultiModalTrainer:
         print(f"Training samples: {train_size, }")
         print(f"Validation samples: {val_size, }")
         print(f"Batches per epoch: {len(train_loader):, }")
+
+        timestamp = datetime.now().strftime(
+            '%b%d_%H-%M-%S')  # getting the current timestamp
+        # setting the base directory for TensorBoard logs
+        base_dir = '/opt/ml/output/tensorboard' if 'SM_MODEL_DIR' in os.environ else 'runs'
+        # creating a directory for the current run
+        log_dir = f"{base_dir}/run_{timestamp}"
+        # creating the directory if it doesn't exist
+        self.writer = SummaryWriter(log_dir=log_dir)
+        # initializing a counter for how many training steps have happened.
+        self.global_step = 0
 
         # Very high: 1, high: 0.1-0.01, medium: 1e-1, low: 1e-4, very low: 1e-5
         """
