@@ -265,7 +265,27 @@ class MultiModalTrainer:
         if phase == "train":  # logging training metrics
             self.current_train_losses = losses  # updating the current training losses
         else:  # validation metrics
-            print("")
+            self.writer.add_scalar(
+                'loss/total/train', self.current_train_losses['total'], self.global_step)
+            self.writer.add_scalar(
+                'loss/emotion/train', self.current_train_losses['emotion'], self.global_step)
+            self.writer.add_scalar(
+                'loss/emotion/val', losses['emotion'], self.global_step)
+
+            self.writer.add_scalar(
+                'loss/sentiment/train', self.current_train_losses['sentiment'], self.global_step)
+            self.writer.add_scalar(
+                'loss/sentiment/val', losses['sentiment'], self.global_step)
+
+        if metrics:
+            elf.writer.add_scalar(
+                f'{phase}/emotion_precision', metrics['emotion_precision'], self.global_step)
+            self.writer.add_scalar(
+                f'{phase}/emotion_accuracy', metrics['emotion_accuracy'], self.global_step)
+            self.writer.add_scalar(
+                f'{phase}/sentiment_precision', metrics['sentiment_precision'], self.global_step)
+            self.writer.add_scalar(
+                f'{phase}/sentiment_accuracy', metrics['sentiment_accuracy'], self.global_step)
 
     def train_epoch(self):
         self.model.train()  # switching the model to training mode
@@ -315,6 +335,14 @@ class MultiModalTrainer:
             running_loss['total'] += total_loss.item()
             running_loss['emotion'] += emotion_loss.item()
             running_loss['sentiment'] += sentiment_loss.item()
+
+            # logging the losses to TensorBoard
+            self.log_metrics({
+                'total': total_loss.item(),
+                'emotion': emotion_loss.item(),
+                'sentiment': sentiment_loss.item()
+            })
+            self.global_step += 1  # incrementing the global step
 
         # dividing the running loss by the number of batches to get the average loss
         return {k: v/len(self.train_loader) for k, v in running_loss.items()}
