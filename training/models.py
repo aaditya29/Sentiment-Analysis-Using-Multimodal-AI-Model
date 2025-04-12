@@ -278,7 +278,7 @@ class MultiModalTrainer:
                 'loss/sentiment/val', losses['sentiment'], self.global_step)
 
         if metrics:
-            elf.writer.add_scalar(
+            self.writer.add_scalar(
                 f'{phase}/emotion_precision', metrics['emotion_precision'], self.global_step)
             self.writer.add_scalar(
                 f'{phase}/emotion_accuracy', metrics['emotion_accuracy'], self.global_step)
