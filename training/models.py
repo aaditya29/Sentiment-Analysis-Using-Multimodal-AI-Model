@@ -205,6 +205,19 @@ class MultiModalTrainer:
         print(f"Batches per epoch: {len(train_loader):, }")
 
         # Very high: 1, high: 0.1-0.01, medium: 1e-1, low: 1e-4, very low: 1e-5
+        """
+        Here we are defining the Adam optimizer and the learning rate scheduler.
+        We are defining different learning rates for different parts of the model.
+        1. Text encoder: 8e-6 
+        2. Video encoder: 8e-5
+        3. Audio encoder: 8e-5
+        4. Fusion layer: 5e-4
+        5. Emotion classifier: 5e-4
+        6. Sentiment classifier: 5e-4
+        Text encoder gets a small learning rate (since it's probably a pretrained BERT-like model)
+        Fusion layer and classifiers get higher rates (since they are trained from scratch)
+        weight_decay helps prevent overfitting by slightly penalizing large weights.
+        """
         self.optimizer = torch.optim.Adam([
             {'params': model.text_encoder.parameters(), 'lr': 8e-6},
             {'params': model.video_encoder.parameters(), 'lr': 8e-5},
@@ -214,19 +227,32 @@ class MultiModalTrainer:
             {'params': model.sentiment_classifier.parameters(), 'lr': 5e-4}
         ], weight_decay=1e-5)
 
+        """
+        Here we are defining the learning rate scheduler.
+        The ReduceLROnPlateau scheduler reduces the learning rate when a metric has stopped improving.
+        It monitors the validation loss and reduces the learning rate by a factor of 0.1 if the loss does not improve for 2 epochs.
+        This helps the model to converge better and avoid overfitting.
+        """
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer, mode='min', factor=0.1, patience=2)
-
+        """
+        Here we are defining the loss functions for emotion and sentiment classification.
+        CrossEntropyLoss is used for multi-class classification (emotions/sentiments)
+        label_smoothing=0.05: helps regularize the model by softening the labels (prevents overconfidence)
+        """
         self.emotion_criterion = nn.CrossEntropyLoss(
             label_smoothing=0.05, weight=self.emotion_weights)
         self.sentiment_criterion = nn.CrossEntropyLoss(
             label_smoothing=0.05, weight=self.sentiment_weights)
 
     def train_epoch(self):
-        self.model.train()
+        self.model.train()  # switching the model to training mode
+        # initializing the running loss dictionary to track the losses
         running_loss = {'total': 0.0, 'emotion': 0.0, 'sentiment': 0.0}
 
+        # iterating over the training data loader
         for batch in self.train_loader:
+            # moving the batch data to the same device as the model
             device = next(self.model.parameters()).device
             text_inputs = {
                 'input_ids': batch['text_inputs']
@@ -234,13 +260,16 @@ class MultiModalTrainer:
                 'attention_mask': batch['text_inputs']
                 ['attention_mask'].to(device)
             }
+            # moving the video frames, audio features, and labels to the same device as the model
             video_frames = batch['video_frames'].to(device)
             audio_features = batch['audio_features'].to(device)
             emotion_labels = batch['emotion_labels'].to(device)
             sentiment_labels = batch['sentiment_labels'].to(device)
 
+            # zero_grad() clears old gradients
             self.optimizer.zero_grad()
 
+            # passing the inputs through the model
             outputs = self.model(text_inputs, video_frames, audio_features)
 
             # calculating the loss using the raw logits
@@ -250,11 +279,14 @@ class MultiModalTrainer:
                 outputs['sentiments'], sentiment_labels)
             total_loss = emotion_loss + sentiment_loss
 
+            """
+            .backward() computes gradients
+            clip_grad_norm_() is used to prevent exploding gradients
+            step() updates model weights
+            """
             total_loss.backward()
-
             torch.nn.utils.clip_grad_norm_(
                 self.model.parameters(), max_norm=1.0)
-
             self.optimizer.step()
 
             # tracking losses
@@ -262,7 +294,11 @@ class MultiModalTrainer:
             running_loss['emotion'] += emotion_loss.item()
             running_loss['sentiment'] += sentiment_loss.item()
 
+        # dividing the running loss by the number of batches to get the average loss
         return {k: v/len(self.train_loader) for k, v in running_loss.items()}
+
+    def validate(self):
+        self.model.eval()
 
 
 if __name__ == "__main__":
