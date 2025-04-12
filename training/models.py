@@ -297,8 +297,74 @@ class MultiModalTrainer:
         # dividing the running loss by the number of batches to get the average loss
         return {k: v/len(self.train_loader) for k, v in running_loss.items()}
 
-    def validate(self):
+    def evaluate(self, data_loader, phase="val"):
         self.model.eval()
+        losses = {'total': 0, 'emotion': 0, 'sentiment': 0}
+        all_emotion_preds = []
+        all_emotion_labels = []
+        all_sentiment_preds = []
+        all_sentiment_labels = []
+
+        with torch.inference_mode():
+            for batch in data_loader:
+                device = next(self.model.parameters()).device
+                text_inputs = {
+                    'input_ids': batch['text_inputs']['input_ids'].to(device),
+                    'attention_mask': batch['text_inputs']['attention_mask'].to(device)
+                }
+                video_frames = batch['video_frames'].to(device)
+                audio_features = batch['audio_features'].to(device)
+                emotion_labels = batch['emotion_label'].to(device)
+                sentiment_labels = batch['sentiment_label'].to(device)
+
+                outputs = self.model(text_inputs, video_frames, audio_features)
+
+                emotion_loss = self.emotion_criterion(
+                    outputs["emotions"], emotion_labels)
+                sentiment_loss = self.sentiment_criterion(
+                    outputs["sentiments"], sentiment_labels)
+                total_loss = emotion_loss + sentiment_loss
+
+                all_emotion_preds.extend(
+                    outputs["emotions"].argmax(dim=1).cpu().numpy())
+                all_emotion_labels.extend(emotion_labels.cpu().numpy())
+                all_sentiment_preds.extend(
+                    outputs["sentiments"].argmax(dim=1).cpu().numpy())
+                all_sentiment_labels.extend(sentiment_labels.cpu().numpy())
+
+                # Track losses
+                losses['total'] += total_loss.item()
+                losses['emotion'] += emotion_loss.item()
+                losses['sentiment'] += sentiment_loss.item()
+
+        avg_loss = {k: v/len(data_loader) for k, v in losses.items()}
+
+        # Compute the precision and accuracy
+        emotion_precision = precision_score(
+            all_emotion_labels, all_emotion_preds, average='weighted')
+        emotion_accuracy = accuracy_score(
+            all_emotion_labels, all_emotion_preds)
+        sentiment_precision = precision_score(
+            all_sentiment_labels, all_sentiment_preds, average='weighted')
+        sentiment_accuracy = accuracy_score(
+            all_sentiment_labels, all_sentiment_preds)
+
+        self.log_metrics(avg_loss, {
+            'emotion_precision': emotion_precision,
+            'emotion_accuracy': emotion_accuracy,
+            'sentiment_precision': sentiment_precision,
+            'sentiment_accuracy': sentiment_accuracy
+        }, phase=phase)
+
+        if phase == "val":
+            self.scheduler.step(avg_loss['total'])
+
+        return avg_loss, {
+            'emotion_precision': emotion_precision,
+            'emotion_accuracy': emotion_accuracy,
+            'sentiment_precision': sentiment_precision,
+            'sentiment_accuracy': sentiment_accuracy
+        }
 
 
 if __name__ == "__main__":
