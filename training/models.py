@@ -264,9 +264,12 @@ class MultiModalTrainer:
     def log_metrics(self, losses, metrics=None, phase="train"):
         if phase == "train":  # logging training metrics
             self.current_train_losses = losses  # updating the current training losses
-        else:  # validation metrics
+        else:  # validation metric
             self.writer.add_scalar(
                 'loss/total/train', self.current_train_losses['total'], self.global_step)
+            self.writer.add_scalar(
+                'loss/total/val', losses['total'], self.global_step)
+
             self.writer.add_scalar(
                 'loss/emotion/train', self.current_train_losses['emotion'], self.global_step)
             self.writer.add_scalar(
