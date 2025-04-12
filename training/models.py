@@ -234,6 +234,16 @@ class MultiModalTrainer:
                 'attention_mask': batch['text_inputs']
                 ['attention_mask'].to(device)
             }
+            video_frames = batch['video_frames'].to(device)
+            audio_features = batch['audio_features'].to(device)
+            emotion_labels = batch['emotion_labels'].to(device)
+            sentiment_labels = batch['sentiment_labels'].to(device)
+
+            self.optimizer.zero_grad()
+
+            outputs = self.model(text_inputs, video_frames, audio_features)
+
+            # calculating the loss using the raw logits
 
 
 if __name__ == "__main__":
