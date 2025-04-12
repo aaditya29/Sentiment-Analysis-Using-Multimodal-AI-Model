@@ -152,7 +152,7 @@ class MultiModalSentimentModel(nn.Module):
             nn.Linear(64, 7)  # sadness and anger
         )
 
-        self.sentiment_classifer = nn.Sequential(
+        self.sentiment_classifier = nn.Sequential(
             nn.Linear(256, 64),
             nn.ReLU(),
             nn.Dropout(0.2),
@@ -202,10 +202,10 @@ class MultiModalTrainer:
         train_size = len(train_loader.dataset)
         # getting the size of the validation dataset
         val_size = len(val_loader.dataset)
-        print("\n Dataset sizes: ")
-        print(f"Training samples: {train_size, }")
-        print(f"Validation samples: {val_size, }")
-        print(f"Batches per epoch: {len(train_loader):, }")
+        print("\nDataset sizes:")
+        print(f"Training samples: {train_size:,}")
+        print(f"Validation samples: {val_size:,}")
+        print(f"Batches per epoch: {len(train_loader):,}")
 
         timestamp = datetime.now().strftime(
             '%b%d_%H-%M-%S')  # getting the current timestamp

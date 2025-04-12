@@ -1,4 +1,4 @@
-from models import MultimodalSentimentModel, MultimodalTrainer
+from models import MultiModalSentimentModel, MultiModalTrainer
 from torch.utils.data import DataLoader
 from collections import namedtuple
 import torch
@@ -15,9 +15,9 @@ def test_logging():
     # Creating a DataLoader with the mock batch. This simulates a data loader that would be used in training or validation
     mock_loader = DataLoader([mock_batch])
     # Instantiating the MultimodalSentimentModel and MultimodalTrainer classes
-    model = MultimodalSentimentModel()
+    model = MultiModalSentimentModel()
     # The MultimodalTrainer is initialized with the model and the mock data loaders for training and validation
-    trainer = MultimodalTrainer(model, mock_loader, mock_loader)
+    trainer = MultiModalTrainer(model, mock_loader, mock_loader)
     # The trainer is used to log metrics during training and validation
     train_losses = {
         'total': 2.5,
