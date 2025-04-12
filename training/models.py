@@ -248,7 +248,21 @@ class MultiModalTrainer:
                 outputs['emotions'], emotion_labels)
             sentiment_loss = self.sentiment_criterion(
                 outputs['sentiments'], sentiment_labels)
-            total_losts = emotion_loss + sentiment_loss
+            total_loss = emotion_loss + sentiment_loss
+
+            total_loss.backward()
+
+            torch.nn.utils.clip_grad_norm_(
+                self.model.parameters(), max_norm=1.0)
+
+            self.optimizer.step()
+
+            # tracking losses
+            running_loss['total'] += total_loss.item()
+            running_loss['emotion'] += emotion_loss.item()
+            running_loss['sentiment'] += sentiment_loss.item()
+
+        return {k: v/len(self.train_loader) for k, v in running_loss.items()}
 
 
 if __name__ == "__main__":
