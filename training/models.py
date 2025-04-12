@@ -314,8 +314,7 @@ if __name__ == "__main__":
     # dictionary containing result sample
     text_inputs = {
         'input_ids': sample['text_inputs']['input_ids'].unsqueeze(0),
-        'attention_mask': sample['text_inputs']
-        ['attention_mask'].unsqueeze(0)
+        'attention_mask': sample['text_inputs']['attention_mask'].unsqueeze(0)
     }
     # unsqueeze to add batch dimension
     video_frames = sample['video_frames'].unsqueeze(0)
