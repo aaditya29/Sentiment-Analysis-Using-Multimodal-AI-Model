@@ -10,3 +10,24 @@ def count_parameters(model):
         'emotion_classifier': 0,
         'sentiment_classifier': 0
     }
+
+    total_params = 0
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            param_count = param.numel()
+            total_params += param_count
+
+            if 'text_encoder' in name:
+                params_dict['text_encoder'] += param_count
+            elif 'video_encoder' in name:
+                params_dict['video_encoder'] += param_count
+            elif 'audio_encoder' in name:
+                params_dict['audio_encoder'] += param_count
+            elif 'fusion_layer' in name:
+                params_dict['fusion_layer'] += param_count
+            elif 'emotion_classifier' in name:
+                params_dict['emotion_classifier'] += param_count
+            elif 'sentiment_classifier' in name:
+                params_dict['sentiment_classifier'] += param_count
+
+    return params_dict, total_params
