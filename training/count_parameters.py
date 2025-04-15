@@ -31,3 +31,14 @@ def count_parameters(model):
                 params_dict['sentiment_classifier'] += param_count
 
     return params_dict, total_params
+
+
+if __name__ == "__main__":
+    model = MultiModalSentimentModel()
+    param_dics, total_params = count_parameters(model)
+
+    print("Parameter count by component")
+    for component, count in param_dics.items():
+        print(f"{component:20s}: {count:,} parameters")
+
+    print("\nTotal trainable parameters", f"{total_params:,}")
