@@ -20,6 +20,7 @@ def count_parameters(model):
             param_count = param.numel()  # get the number of elements in the parameter tensor
             total_params += param_count  # add to the total parameter count
 
+            # checking which component the parameter belongs to and adding to the respective count
             if 'text_encoder' in name:
                 params_dict['text_encoder'] += param_count
             elif 'video_encoder' in name:
@@ -33,6 +34,7 @@ def count_parameters(model):
             elif 'sentiment_classifier' in name:
                 params_dict['sentiment_classifier'] += param_count
 
+    # returning the dictionary with parameter counts for each component and the total parameter count
     return params_dict, total_params
 
 
