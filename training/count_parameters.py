@@ -1,6 +1,7 @@
 from models import MultiModalSentimentModel
 
 
+# storing the parameter count for each named component in the model
 def count_parameters(model):
     params_dict = {
         'text_encoder': 0,
@@ -11,11 +12,13 @@ def count_parameters(model):
         'sentiment_classifier': 0
     }
 
+    # counting the total number of parameters in the model
     total_params = 0
+    # iterating through each named parameter in the model
     for name, param in model.named_parameters():
-        if param.requires_grad:
-            param_count = param.numel()
-            total_params += param_count
+        if param.requires_grad:  # check if the parameter is trainable
+            param_count = param.numel()  # get the number of elements in the parameter tensor
+            total_params += param_count  # add to the total parameter count
 
             if 'text_encoder' in name:
                 params_dict['text_encoder'] += param_count
