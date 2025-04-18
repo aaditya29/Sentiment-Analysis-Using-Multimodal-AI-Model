@@ -100,3 +100,36 @@ def main():
                         "Value": val_metrics["sentiment_accuracy"]},
                 ]
             }))
+
+            if torch.cuda.is_available():
+                memory_used = torch.cuda.max_memory_allocated() / 1024**3
+                print(f"Peak GPU memory used: {memory_used:.2f} GB")
+
+            # Saving best model
+            if val_loss["total"] < best_val_loss:
+                best_val_loss = val_loss["total"]
+                torch.save(model.state_dict(), os.path.join(
+                    args.model_dir, "model.pth"))
+
+        # After training is complete, evaluate on test set
+        print("Evaluating on test set...")
+        test_loss, test_metrics = trainer.evaluate(test_loader, phase="test")
+        metrics_data["test_loss"] = test_loss["total"]
+
+        print(json.dumps({
+            "metrics": [
+                {"Name": "test:loss", "Value": test_loss["total"]},
+                {"Name": "test:emotion_accuracy",
+                    "Value": test_metrics["emotion_accuracy"]},
+                {"Name": "test:sentiment_accuracy",
+                    "Value": test_metrics["sentiment_accuracy"]},
+                {"Name": "test:emotion_precision",
+                    "Value": test_metrics["emotion_precision"]},
+                {"Name": "test:sentiment_precision",
+                    "Value": test_metrics["sentiment_precision"]},
+            ]
+        }))
+
+
+if __name__ == "__main__":
+    main()
