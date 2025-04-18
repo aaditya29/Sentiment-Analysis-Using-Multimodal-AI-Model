@@ -75,3 +75,28 @@ def main():
             'val_loss': [],
             'epochs': []
         }
+
+        for epoch in tqdm(range(args.epochs), desc="Epochs"):
+            train_loss = trainer.train_epoch()
+            val_loss, val_metrics = trainer.evaluate(val_loader)
+
+            # Tracking metrics
+            metrics_data["train_losses"].append(train_loss["total"])
+            metrics_data["val_losses"].append(val_loss["total"])
+            metrics_data["epochs"].append(epoch)
+
+            # Logging metrics in SageMaker format
+            print(json.dumps({
+                "metrics": [
+                    {"Name": "train:loss", "Value": train_loss["total"]},
+                    {"Name": "validation:loss", "Value": val_loss["total"]},
+                    {"Name": "validation:emotion_precision",
+                        "Value": val_metrics["emotion_precision"]},
+                    {"Name": "validation:emotion_accuracy",
+                        "Value": val_metrics["emotion_accuracy"]},
+                    {"Name": "validation:sentiment_precision",
+                        "Value": val_metrics["sentiment_precision"]},
+                    {"Name": "validation:sentiment_accuracy",
+                        "Value": val_metrics["sentiment_accuracy"]},
+                ]
+            }))
