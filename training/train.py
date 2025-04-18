@@ -1,3 +1,6 @@
+from models import MultiModalSentimentModel, MultiModalTrainer
+from meld_dataset import prepare_dataloaders
+
 from tqdm import tqdm
 import torchaudio
 import argparse
@@ -35,4 +38,40 @@ def parse_args():
 
 def main():
 
+    # printing the available audio backends
     print("Available audio backends: ")
+    print(str(torchaudio.list_audio_backends()))
+
+    args = parse_args()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Tracking initial GPU memory if availlable
+    if torch.cuda.is_availlable():
+        torch.cuda.reset_peak_memory_stats()
+        memory_used = torch.cuda.max_memory_allocated() / 1024**3
+        print(f"Initial GPU memory used: {memory_used:.2f} GB")
+
+        train_loader, val_loader, test_loader = prepare_dataloaders(
+            train_csv=os.path.join(args.train_dir, 'train_sent_emo.csv'),
+            train_video_dir=os.path.join(args.train_dir, 'train_splits'),
+            dev_csv=os.path.join(args.val_dir, 'dev_sent_emo.csv'),
+            dev_video_dir=os.path.join(args.val_dir, 'dev_splits_complete'),
+            test_csv=os.path.join(args.test_dir, 'test_sent_emo.csv'),
+            test_video_dir=os.path.join(
+                args.test_dir, 'output_repeated_splits_test'),
+            batch_size=args.batch_size
+        )
+
+        print(f"""Training DSV path: {os.path.join(
+            args.train_dir, 'train_sent_emo.csv')}""")
+        print(f"""Training video directory: {
+            os.path.join(args.train_dir, 'train_splits')}""")
+        model = MultiModalSentimentModel().to(device)
+        trainer = MultiModalTrainer(model, train_loader, val_loader)
+        best_val_loss = float('inf')  # best validation loss
+
+        metrics_data = {
+            'train_loss': [],
+            'val_loss': [],
+            'epochs': []
+        }
