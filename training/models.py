@@ -303,6 +303,14 @@ class MultiModalTrainer:
         print("\nCalculating class weights...")
         emotion_weights, sentiment_weights = compute_class_weights(
             train_loader.dataset)
+
+        device = next(model.parameters()).device
+
+        self.emotion_weights = emotion_weights.to(device)
+        self.sentiment_weights = sentiment_weights.to(device)
+
+        print(f"Emotion weights on device: {self.emotion_weights.device}")
+        print(f"Sentiments weights on device: {self.sentiment_weights.device}")
         """
         Here we are defining the loss functions for emotion and sentiment classification.
         CrossEntropyLoss is used for multi-class classification (emotions/sentiments)
