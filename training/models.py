@@ -191,6 +191,11 @@ class MultiModalSentimentModel(nn.Module):
         }
 
 
+def compute_class_weights(dataset):
+    emotion_counts = torch.zeros(7)
+    sentiment_counts = torch.zeros(3)
+
+
 class MultiModalTrainer:
     def __init__(self, model, train_loader, val_loader):
         self.model = model  # initializing the model
