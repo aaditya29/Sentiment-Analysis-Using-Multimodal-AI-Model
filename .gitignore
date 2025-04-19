@@ -6,3 +6,4 @@ training/__pycache__
 training/runs
 deployment/model
 deployment/model_normalised
+deployment/joy.mp4
