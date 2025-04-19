@@ -4,4 +4,5 @@ MELD.Raw.tar.gz
 dataset.Raw
 training/__pycache__
 training/runs
-deployment/model 
+deployment/model
+deployment/model_normalised
