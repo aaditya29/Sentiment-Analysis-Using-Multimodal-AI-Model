@@ -236,12 +236,26 @@ def predict_fn(input_data, model_dict):
     return {"utterances": predictions}
 
 
-def process_local_video(video_path, model_dir="model"):
+def process_local_video(video_path, model_dir="model_normalised"):
     model_dict = model_fn(model_dir)
 
     input_data = {
         'video_path': video_path,
     }
+    predictions = predict_fn(input_data, model_dict)
+
+    for utterance in predictions["utterances"]:
+        print("\nUtterance:")
+        print(f"""Start: {utterance['start_time']}s, End: {
+              utterance['end_time']}s""")
+        print(f"Text: {utterance['text']}")
+        print("\n Top Emotions:")
+        for emotion in utterance['emotions']:
+            print(f"{emotion['label']}: {emotion['confidence']:.2f}")
+        print("\n Top Sentiments:")
+        for sentiment in utterance['sentiments']:
+            print(f"{sentiment['label']}: {sentiment['confidence']:.2f}")
+        print("-"*50)
 
 
 if __name__ == "__main__":
