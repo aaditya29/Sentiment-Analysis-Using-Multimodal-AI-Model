@@ -9,3 +9,8 @@ def model_fn(model_dir):
     model = MultimodalSentimentModel().to(device)  # Load the model
 
     model_path = os.path.join(model_dir, "model.pth")
+    if not os.path.exists(model_path):
+        model_path = os.path.join(model_dir, 'model.pth')
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(
+                "Model file not found in path " + model_path)
