@@ -162,7 +162,39 @@ def model_fn(model_dir):
 
 
 def predict_fn(input_data, model_dict):
-    pass
+    model = model_dict['model']
+    tokenizer = model_dict['tokenizer']
+    device = model_dict['device']
+    video_path = input_data['video_path']
+
+    result = model_dict['transcriber'].transcribe(
+        video_path, word_timestamps=True)
+
+    utterance_processor = VideoUtteranceProcessor()
+    predictions = []
+
+    for segment in result["segments"]:
+        try:
+            segment_path = utterance_processor.extract_segment(
+                video_path,
+                segment["start"],
+                segment["end"]
+            )
+
+            video_frames = utterance_processor.video_processor.process_video(
+                segment_path)
+            audio_features = utterance_processor.audio_processor.extract_features(
+                segment_path)
+            text_inputs = tokenizer(
+                segment["text"],
+                padding="max_length",
+                truncation=True,
+                max_length=128,
+                return_tensors="pt"
+            )
+
+        except:
+            pass
 
 
 def process_local_video(video_path, model_dir="model"):
