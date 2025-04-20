@@ -9,6 +9,10 @@ import torch
 import cv2
 import os
 
+EMOTION_MAP = {0: "anger", 1: "disgust", 2: "fear",
+               3: "joy", 4: "neutral", 5: "sadness", 6: "surprise"}
+SENTIMENT_MAP = {0: "negative", 1: "neutral", 2: "positive"}
+
 
 class VideoProcessor:
     def process_video(self, video_path):
@@ -192,6 +196,11 @@ def predict_fn(input_data, model_dict):
                 max_length=128,
                 return_tensors="pt"
             )
+
+            # Moving to device
+            text_inputs = {k: v.to(device) for k, v in text_inputs.items()}
+            video_frames = video_frames.unsqueeze(0).to(device)
+            audio_features = audio_features.unsqueeze(0).to(device)
 
         except:
             pass
