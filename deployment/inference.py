@@ -1,4 +1,5 @@
 from models import MultimodalSentimentModel
+from transformers import AutoTokenizer
 import torch
 import os
 
