@@ -202,8 +202,38 @@ def predict_fn(input_data, model_dict):
             video_frames = video_frames.unsqueeze(0).to(device)
             audio_features = audio_features.unsqueeze(0).to(device)
 
-        except:
-            pass
+            # getting predictions
+            with torch.inference_mode():
+                outputs = model(text_inputs, video_frames, audio_features)
+                emotion_probs = torch.softmax(outputs["emotions"], dim=1)[0]
+                sentiment_probs = torch.softmax(
+                    outputs["sentiments"], dim=1)[0]
+
+                emotion_values, emotion_indices = torch.topk(emotion_probs, 3)
+                sentiment_values, sentiment_indices = torch.topk(
+                    sentiment_probs, 3)
+
+            predictions.append({
+                "start_time": segment["start"],
+                "end_time": segment["end"],
+                "text": segment["text"],
+                "emotions": [
+                    {"label": EMOTION_MAP[idx.item()],
+                     "confidence": conf.item()} for idx, conf in zip(emotion_indices, emotion_values)
+                ],
+                "sentiments": [
+                    {"label": SENTIMENT_MAP[idx.item()],
+                     "confidence": conf.item()} for idx, conf in zip(sentiment_indices, sentiment_values)
+                ]
+            })
+        except Exception as e:
+            print("Segment failed inference: " + str(e))
+
+        finally:
+            # Cleaning up
+            if os.path.exists(segment_path):
+                os.remove(segment_path)
+    return {"utterances": predictions}
 
 
 def process_local_video(video_path, model_dir="model"):
