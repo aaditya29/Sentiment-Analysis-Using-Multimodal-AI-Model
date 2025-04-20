@@ -1,8 +1,10 @@
 from models import MultimodalSentimentModel
 from transformers import AutoTokenizer
+from transformers import BertTokenizer
 import numpy as np
 import subprocess
 import torchaudio
+import whisper
 import torch
 import cv2
 import os
@@ -150,5 +152,26 @@ def model_fn(model_dir):
 
     return {
         'model': model,
-        'device': device,
+        'tokenizer': AutoTokenizer.from_pretrained('bert-base-uncased'),
+        'transcriber': whisper.load_model(
+            "base",
+            device="cpu" if device.type == "cpu" else device,
+        ),
+        'device': device
     }
+
+
+def predict_fn(input_data, model_dict):
+    pass
+
+
+def process_local_video(video_path, model_dir="model"):
+    model_dict = model_fn(model_dir)
+
+    input_data = {
+        'video_path': video_path,
+    }
+
+
+if __name__ == "__main__":
+    process_local_video("./joy.mp4")
