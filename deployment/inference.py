@@ -103,6 +103,34 @@ class AudioProcessor:
                 os.remove(audio_path)
 
 
+class VideoUtteranceProcessor:
+    def __init__(self):
+        self.video_processor = VideoProcessor()
+        self.audio_processor = AudioProcessor()
+
+    def extract_segment(self, video_path, start_time, end_time, temp_dir="/tmp"):
+        # Creating temp directory if it doesn't exist
+        os.makedirs(temp_dir, exist_ok=True)
+
+        segment_path = os.path.join(
+            temp_dir, f"segment_{start_time}_{end_time}.mp4")
+
+        subprocess.run([
+            "ffmpeg", "-i", video_path,
+            "-ss", str(start_time),
+            "-to", str(end_time),
+            "-c:v", "libx264",
+            "-c:a", "aac",
+            "-y",
+            segment_path
+        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        if not os.path.exists(segment_path) or os.path.getsize(segment_path) == 0:
+            raise ValueError("Segment extraction failed: " + segment_path)
+
+        return segment_path
+
+
 def model_fn(model_dir):
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")  # Checking if GPU is available
